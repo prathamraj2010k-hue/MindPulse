@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MindPulse — AI-Powered STEM Labs</title>
+
+<!-- Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- KaTeX via CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#0f1530; --card:#151c3a; --card2:#1b2450;
+    --ink:#e8ecff; --muted:#9aa3c7;
+    --accent:#7c5cff; --accent2:#22d3ee; --accent3:#f472b6;
+    --phys:#7c5cff; --chem:#34d399; --bio:#f472b6; --ai:#fbbf24;
+    --good:#34d399; --warn:#fbbf24; --bad:#ef4444;
+  }
+  html,body{background:
+      radial-gradient(1200px 800px at 10% -10%, #1a2350 0%, transparent 60%),
+      radial-gradient(900px 700px at 110% 10%, #2a1b50 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  .glass{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.08); backdrop-filter:blur(10px);}
+  .tab-btn{transition:all .25s ease;}
+  .tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 8px 24px -8px rgba(124,92,255,.6);}
+  .grad-text{background:linear-gradient(135deg,#a78bfa,#22d3ee 60%,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .ai-text{background:linear-gradient(135deg,#fbbf24,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:8px;border-radius:999px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;
+    border-radius:50%;background:#fff;border:3px solid var(--accent);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--accent);cursor:pointer;}
+  .pulse-ring{animation:pulseRing 2.2s ease-out infinite;}
+  @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(124,92,255,.55);}70%{box-shadow:0 0 0 18px rgba(124,92,255,0);}100%{box-shadow:0 0 0 0 rgba(124,92,255,0);}}
+  .pop{animation:pop .35s cubic-bezier(.2,.8,.2,1.2);}
+  @keyframes pop{0%{transform:scale(.85);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  .fade-in{animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .confetti{position:fixed;width:10px;height:14px;top:-20px;opacity:.95;z-index:60;pointer-events:none;border-radius:2px;}
+  .scroll-thin::-webkit-scrollbar{height:8px;width:8px;}
+  .scroll-thin::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:8px;}
+  .kanban-card{transition:transform .2s ease;}
+  .kanban-card:hover{transform:translateY(-2px);}
+  .glow{box-shadow:0 0 0 1px rgba(124,92,255,.35), 0 10px 40px -10px rgba(124,92,255,.5);}
+
+  /* Chemistry beaker */
+  .beaker{position:relative;width:220px;height:260px;margin:0 auto;
+    background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
+    border:3px solid rgba(255,255,255,.35);border-top:none;
+    border-radius:0 0 28px 28px;overflow:hidden;
+    box-shadow:inset 0 0 30px rgba(255,255,255,.05);}
+  .beaker::before{content:'';position:absolute;top:-9px;left:-12px;right:-12px;height:9px;
+    background:rgba(255,255,255,.45);border-radius:6px;}
+  .liquid{position:absolute;bottom:0;left:0;right:0;height:0;
+    background:#22d3ee;transition:height .9s ease,background-color .9s ease;}
+  .liquid::before{content:'';position:absolute;top:-6px;left:0;right:0;height:12px;
+    background:inherit;border-radius:50%;opacity:.5;animation:wave 2.5s ease-in-out infinite;}
+  @keyframes wave{0%,100%{transform:scaleX(1);}50%{transform:scaleX(1.05);}}
+  .bubble{position:absolute;bottom:0;background:rgba(255,255,255,.7);border-radius:50%;
+    animation:rise 2.4s linear forwards;pointer-events:none;}
+  @keyframes rise{0%{bottom:0;opacity:.85;transform:scale(.4);}10%{opacity:.9;}
+    100%{bottom:95%;opacity:0;transform:scale(1.3);}}
+  .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;border-radius:0 0 28px 28px;}
+  .flash.go{animation:flashAnim .9s ease-out;}
+  @keyframes flashAnim{0%{opacity:0;}15%{opacity:.95;}100%{opacity:0;}}
+  .reagent-chip{cursor:pointer;transition:all .2s ease;user-select:none;}
+  .reagent-chip:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.5);}
+  .reagent-chip.selected{background:linear-gradient(135deg,var(--chem),#fbbf24)!important;color:#06281d!important;border-color:transparent;}
+
+  /* Biology hotspots — now glowing dots positioned over real photos */
+  .anatomy-wrap{position:relative;display:inline-block;max-width:100%;}
+  .anatomy-wrap img{display:block;max-height:420px;width:auto;max-width:100%;border-radius:14px;box-shadow:0 10px 40px -10px rgba(0,0,0,.5);}
+  .hotspot-dot{position:absolute;width:34px;height:34px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #fff 0%, #f472b6 60%, #7c5cff 100%);
+    border:2px solid #fff;cursor:pointer;transform:translate(-50%,-50%);
+    box-shadow:0 0 0 0 rgba(244,114,182,.6), 0 0 20px rgba(255,255,255,.6);
+    animation:dotPulse 2s ease-in-out infinite;z-index:2;transition:transform .15s ease;}
+  .hotspot-dot:hover{transform:translate(-50%,-50%) scale(1.25);}
+  .hotspot-dot.solved{background:radial-gradient(circle at 30% 30%, #fff 0%, #34d399 60%, #059669 100%);
+    box-shadow:0 0 0 0 rgba(52,211,153,.5), 0 0 16px rgba(52,211,153,.7);animation:none;}
+  .hotspot-dot::after{content:attr(data-label);position:absolute;top:38px;left:50%;transform:translateX(-50%);
+    background:rgba(0,0,0,.85);color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;
+    white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s ease;}
+  .hotspot-dot:hover::after{opacity:1;}
+  @keyframes dotPulse{0%,100%{box-shadow:0 0 0 0 rgba(244,114,182,.7), 0 0 18px rgba(255,255,255,.5);}
+    50%{box-shadow:0 0 0 12px rgba(244,114,182,0), 0 0 22px rgba(255,255,255,.8);}}
+  .quiz-opt{transition:all .18s ease;}
+  .quiz-opt:hover{background:rgba(255,255,255,.12);}
+  .quiz-opt.correct{background:rgba(52,211,153,.25)!important;border-color:var(--good)!important;}
+  .quiz-opt.wrong{background:rgba(239,68,68,.25)!important;border-color:var(--bad)!important;}
+
+  /* AI Tutor chat */
+  #aiChatFab{position:fixed;bottom:24px;right:24px;width:64px;height:64px;border-radius:50%;
+    background:linear-gradient(135deg,#fbbf24,#f472b6);color:#fff;font-size:28px;display:flex;
+    align-items:center;justify-content:center;cursor:pointer;z-index:50;
+    box-shadow:0 10px 30px -5px rgba(251,191,36,.6);transition:transform .2s ease;border:none;}
+  #aiChatFab:hover{transform:scale(1.08);}
+  #aiChatFab .dot{position:absolute;top:6px;right:6px;width:12px;height:12px;border-radius:50%;
+    border:2px solid var(--bg);}
+  #aiChatFab .dot.on{background:#34d399;}
+  #aiChatFab .dot.off{background:#ef4444;}
+  #aiChatPanel{position:fixed;bottom:100px;right:24px;width:380px;max-width:calc(100vw - 48px);
+    height:540px;max-height:calc(100vh - 140px);z-index:50;display:none;flex-direction:column;
+    background:var(--card);border:1px solid rgba(255,255,255,.12);border-radius:20px;overflow:hidden;
+    box-shadow:0 25px 60px -10px rgba(0,0,0,.6);}
+  #aiChatPanel.open{display:flex;animation:pop .25s ease;}
+  .chat-msg{padding:10px 14px;border-radius:14px;max-width:85%;font-size:14px;line-height:1.45;word-wrap:break-word;}
+  .chat-msg.user{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+  .chat-msg.ai{background:rgba(255,255,255,.07);color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid rgba(255,255,255,.08);}
+  .chat-msg.ai b{color:var(--ai);}
+  .typing{display:inline-flex;gap:3px;}
+  .typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typing 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.2s;}
+  .typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes typing{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-4px);}}
+
+  /* Flashcard */
+  .flashcard{perspective:1000px;cursor:pointer;}
+  .flashcard-inner{transition:transform .5s;transform-style:preserve-3d;position:relative;}
+  .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+  .flashcard-face{backface-visibility:hidden;position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:14px;border-radius:14px;text-align:center;}
+  .flashcard-back{transform:rotateY(180deg);}
+  .flashcard-front{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+  .flashcard-back{background:linear-gradient(135deg,var(--accent3),var(--ai));color:#fff;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ===================== HEADER ===================== -->
+<header class="sticky top-0 z-40 glass">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-4 justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl font-black pulse-ring"
+           style="background:linear-gradient(135deg,var(--accent),var(--accent2));">⚡</div>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black tracking-tight grad-text leading-none">MindPulse <span class="ai-text text-base align-middle">AI</span></h1>
+        <p class="text-[11px] sm:text-xs text-[var(--muted)] mt-0.5">AI-powered virtual labs for curious minds</p>
+      </div>
+    </div>
+
+    <!-- XP / Level tracker -->
+    <div class="flex items-center gap-3 min-w-[260px] sm:min-w-[340px]">
+      <div class="text-right">
+        <div id="lvlBadge" class="text-xs font-bold px-2 py-0.5 rounded-full"
+             style="background:linear-gradient(135deg,var(--accent3),var(--accent));color:#fff;">Level 1</div>
+        <div class="text-[10px] text-[var(--muted)] mt-0.5"><span id="xpText">0</span> / <span id="xpNext">200</span> XP</div>
+      </div>
+      <div class="flex-1 h-3 rounded-full bg-white/10 overflow-hidden">
+        <div id="xpBar" class="h-full rounded-full transition-all duration-500"
+             style="width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));"></div>
+      </div>
+      <button id="aiSettingsBtn" title="AI Settings" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/15 flex items-center justify-center text-lg">⚙️</button>
+      <div class="text-xl">🏆</div>
+    </div>
+  </div>
+
+  <!-- Nav tabs -->
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 pb-3 flex gap-2 overflow-x-auto scroll-thin">
+    <button data-tab="dashboard" class="tab-btn active px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap">🏠 Dashboard</button>
+    <button data-tab="physics"   class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap">🚀 Physics Lab</button>
+    <button data-tab="chemistry" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap">🧪 Chemistry Lab</button>
+    <button data-tab="biology"   class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap">🦋 Biology Lab</button>
+    <button data-tab="aibuddy"   class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap" style="background:linear-gradient(135deg,#fbbf24,#f472b6);color:#fff;">🤖 AI Study Buddy</button>
+  </nav>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <section data-panel="dashboard" class="panel fade-in">
+    <div class="grid lg:grid-cols-3 gap-5">
+      <div class="lg:col-span-2 glass rounded-3xl p-6 kanban-card">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h2 class="text-2xl font-black">Welcome to <span class="grad-text">MindPulse AI</span> 👋</h2>
+            <p class="text-[var(--muted)] mt-1 max-w-xl">Three virtual labs + an AI Study Buddy. Run physics experiments, mix chemicals, dissect creatures, and ask the AI to teach you anything — all while leveling up your STEM XP.</p>
+          </div>
+          <div class="text-5xl">🧠</div>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-3 mt-6">
+          <div class="rounded-2xl p-4 glass kanban-card">
+            <div class="text-xs text-[var(--muted)]">Total XP</div>
+            <div id="statXP" class="text-3xl font-black grad-text">0</div>
+          </div>
+          <div class="rounded-2xl p-4 glass kanban-card">
+            <div class="text-xs text-[var(--muted)]">Current Level</div>
+            <div id="statLvl" class="text-3xl font-black" style="color:var(--accent2)">1</div>
+          </div>
+          <div class="rounded-2xl p-4 glass kanban-card">
+            <div class="text-xs text-[var(--muted)]">Experiments Run</div>
+            <div id="statRuns" class="text-3xl font-black" style="color:var(--accent3)">0</div>
+          </div>
+        </div>
+        <div id="aiStatusBanner" class="mt-4 rounded-xl p-3 text-sm flex items-center gap-3" style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);">
+          <span class="text-2xl">🤖</span>
+          <div>
+            <div class="font-semibold" id="aiBannerTitle">AI: Demo Mode</div>
+            <div class="text-xs text-[var(--muted)]" id="aiBannerMsg">Click ⚙️ to add a free Google Gemini API key and unlock real AI responses.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass rounded-3xl p-6 kanban-card">
+        <h3 class="font-bold text-lg mb-3">🎯 Daily Challenges</h3>
+        <ul class="space-y-3 text-sm">
+          <li class="flex items-start gap-3"><span class="mt-0.5">🚀</span>
+            <div><b>Reach 80 m range</b> in the Projectile Lab. <span class="text-[var(--good)] font-semibold">+50 XP</span>
+              <button class="mt-1 w-full text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:linear-gradient(135deg,var(--phys),var(--accent2))" onclick="goTab('physics')">Open Physics →</button></div></li>
+          <li class="flex items-start gap-3"><span class="mt-0.5">🧪</span>
+            <div><b>Discover 3 reactions</b> in the mixing station. <span class="text-[var(--good)] font-semibold">+50 XP each</span>
+              <button class="mt-1 w-full text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:linear-gradient(135deg,var(--chem),#fbbf24)" onclick="goTab('chemistry')">Open Chemistry →</button></div></li>
+          <li class="flex items-start gap-3"><span class="mt-0.5">🦋</span>
+            <div><b>Ace 3 anatomy quizzes</b> across fish, bird, and rabbit. <span class="text-[var(--good)] font-semibold">+50 XP each</span>
+              <button class="mt-1 w-full text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:linear-gradient(135deg,var(--bio),#22d3ee)" onclick="goTab('biology')">Open Biology →</button></div></li>
+          <li class="flex items-start gap-3"><span class="mt-0.5">🤖</span>
+            <div><b>Generate an AI lesson</b> on any topic. <span class="text-[var(--good)] font-semibold">+50 XP</span>
+              <button class="mt-1 w-full text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:linear-gradient(135deg,#fbbf24,#f472b6)" onclick="goTab('aibuddy')">Open AI Buddy →</button></div></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="text-lg font-bold mt-8 mb-3">🧪 Virtual Labs + AI</h3>
+    <div class="grid md:grid-cols-4 gap-5">
+      <div class="glass rounded-3xl p-6 kanban-card cursor-pointer" onclick="goTab('physics')">
+        <div class="text-4xl mb-3">🚀</div>
+        <h4 class="font-bold text-lg">Physics Lab</h4>
+        <p class="text-sm text-[var(--muted)] mt-1">Launch projectiles at any angle, velocity, and gravity.</p>
+        <div class="mt-3 text-xs px-2 py-1 rounded-full inline-block" style="background:rgba(124,92,255,.15);color:var(--phys)">Projectile Motion</div>
+      </div>
+      <div class="glass rounded-3xl p-6 kanban-card cursor-pointer" onclick="goTab('chemistry')">
+        <div class="text-4xl mb-3">🧪</div>
+        <h4 class="font-bold text-lg">Chemistry Lab</h4>
+        <p class="text-sm text-[var(--muted)] mt-1">Mix reagents and watch real balanced equations come alive.</p>
+        <div class="mt-3 text-xs px-2 py-1 rounded-full inline-block" style="background:rgba(52,211,153,.15);color:var(--chem)">Reactions</div>
+      </div>
+      <div class="glass rounded-3xl p-6 kanban-card cursor-pointer" onclick="goTab('biology')">
+        <div class="text-4xl mb-3">🦋</div>
+        <h4 class="font-bold text-lg">Biology Lab</h4>
+        <p class="text-sm text-[var(--muted)] mt-1">Click body parts to learn fun facts + AI-generated quizzes.</p>
+        <div class="mt-3 text-xs px-2 py-1 rounded-full inline-block" style="background:rgba(244,114,182,.15);color:var(--bio)">Anatomy + AI</div>
+      </div>
+      <div class="glass rounded-3xl p-6 kanban-card cursor-pointer" onclick="goTab('aibuddy')">
+        <div class="text-4xl mb-3">🤖</div>
+        <h4 class="font-bold text-lg">AI Study Buddy</h4>
+        <p class="text-sm text-[var(--muted)] mt-1">Type any topic — AI generates a lesson, quiz & flashcards.</p>
+        <div class="mt-3 text-xs px-2 py-1 rounded-full inline-block" style="background:rgba(251,191,36,.15);color:var(--ai)">AI-Powered</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PHYSICS LAB ===================== -->
+  <section data-panel="physics" class="panel hidden">
+    <div class="grid lg:grid-cols-3 gap-5">
+      <div class="glass rounded-3xl p-6 lg:col-span-1">
+        <h2 class="text-xl font-black mb-1">🚀 Projectile Lab</h2>
+        <p class="text-xs text-[var(--muted)] mb-5">Adjust the cannon. Hit <b>Launch</b> to fire and earn XP.</p>
+        <div class="space-y-5">
+          <div><div class="flex justify-between text-sm font-semibold mb-2"><span>Launch Angle</span><span id="angVal" class="grad-text">45°</span></div>
+            <input id="ang" type="range" min="0" max="90" value="45" class="w-full" /></div>
+          <div><div class="flex justify-between text-sm font-semibold mb-2"><span>Initial Velocity</span><span id="velVal" class="grad-text">40 m/s</span></div>
+            <input id="vel" type="range" min="5" max="100" value="40" class="w-full" /></div>
+          <div><div class="flex justify-between text-sm font-semibold mb-2"><span>Gravity</span><span id="gravVal" class="grad-text">9.8 m/s²</span></div>
+            <input id="grav" type="range" min="1" max="25" step="0.1" value="9.8" class="w-full" /></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-6">
+          <button id="launchBtn" class="col-span-2 py-3 rounded-xl font-bold text-white glow" style="background:linear-gradient(135deg,var(--phys),var(--accent2))">🚀 Launch!</button>
+          <button id="resetPhysBtn" class="py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/15">↺ Reset</button>
+          <button id="trailBtn" class="py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/15">Trail: On</button>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mt-5 text-center">
+          <div class="rounded-xl p-2 bg-white/5"><div class="text-[10px] text-[var(--muted)]">Range</div><div id="rRange" class="font-black text-sm" style="color:var(--accent2)">0 m</div></div>
+          <div class="rounded-xl p-2 bg-white/5"><div class="text-[10px] text-[var(--muted)]">Max Height</div><div id="rHeight" class="font-black text-sm" style="color:var(--accent3)">0 m</div></div>
+          <div class="rounded-xl p-2 bg-white/5"><div class="text-[10px] text-[var(--muted)]">Flight Time</div><div id="rTime" class="font-black text-sm" style="color:var(--warn)">0 s</div></div>
+        </div>
+        <div id="challengeNote" class="mt-3 text-xs text-[var(--muted)]">💡 Challenge: reach a range of <b>80 m</b> for bonus XP.</div>
+        <div class="mt-4 p-3 rounded-xl bg-white/5 text-xs">
+          <div class="font-semibold mb-1">📐 Theory</div>
+          <div class="text-[var(--muted)]">Range $R=\frac{v_0^2\sin(2\theta)}{g}$ · Max height $H=\frac{v_0^2\sin^2\theta}{2g}$</div>
+        </div>
+        <button class="mt-3 w-full py-2 rounded-xl text-xs font-semibold" style="background:linear-gradient(135deg,#fbbf24,#f472b6)" onclick="askAiAbout('physics')">🤖 Ask AI: Why 45°?</button>
+      </div>
+      <div class="glass rounded-3xl p-4 lg:col-span-2 relative overflow-hidden">
+        <canvas id="physCanvas" class="w-full rounded-2xl" style="background:linear-gradient(180deg,#0a1230,#10204a);height:440px;"></canvas>
+        <div class="absolute top-6 left-6 text-xs text-[var(--muted)] glass px-3 py-1.5 rounded-lg">Parabolic trajectory • live</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CHEMISTRY LAB ===================== -->
+  <section data-panel="chemistry" class="panel hidden">
+    <div class="grid lg:grid-cols-3 gap-5">
+      <div class="glass rounded-3xl p-6 lg:col-span-1">
+        <h2 class="text-xl font-black mb-1">🧪 Mixing Station</h2>
+        <p class="text-xs text-[var(--muted)] mb-4">Pick any <b>two</b> reagents, then hit <b>Mix</b>. Discover all 8 reactions!</p>
+        <div id="reagentGrid" class="grid grid-cols-3 gap-2"></div>
+        <div class="grid grid-cols-2 gap-2 mt-5">
+          <button id="mixBtn" class="col-span-2 py-3 rounded-xl font-bold text-white glow disabled:opacity-40 disabled:cursor-not-allowed" style="background:linear-gradient(135deg,var(--chem),#fbbf24)" disabled>🧪 Mix it!</button>
+          <button id="clearBeakerBtn" class="py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/15">↺ Clear</button>
+          <button id="hintBtn" class="py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/15">💡 Hint</button>
+        </div>
+        <div class="mt-4 text-xs text-[var(--muted)]">
+          <div class="font-semibold text-[var(--ink)] mb-1">Reactions discovered: <span id="discoveredCount">0</span> / 8</div>
+          <div id="discoveredList" class="flex flex-wrap gap-1"></div>
+        </div>
+        <button class="mt-3 w-full py-2 rounded-xl text-xs font-semibold" style="background:linear-gradient(135deg,#fbbf24,#f472b6)" onclick="askAiAbout('chemistry')">🤖 Ask AI: Explain this reaction</button>
+      </div>
+      <div class="glass rounded-3xl p-6 lg:col-span-2">
+        <div class="grid md:grid-cols-2 gap-6 items-center">
+          <div class="text-center">
+            <div class="flex justify-center gap-2 mb-3 min-h-[28px]">
+              <span id="slot1" class="px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-[var(--muted)]">empty</span>
+              <span class="text-[var(--muted)]">+</span>
+              <span id="slot2" class="px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-[var(--muted)]">empty</span>
+            </div>
+            <div class="beaker"><div class="liquid" id="chemLiquid"></div><div id="chemBubbles"></div><div class="flash" id="chemFlash"></div></div>
+            <div id="chemStatus" class="mt-3 text-sm font-semibold text-[var(--muted)]">Add two reagents to begin</div>
+          </div>
+          <div>
+            <div class="rounded-2xl p-4 bg-white/5 border border-white/10">
+              <div class="text-xs text-[var(--muted)] mb-1">Balanced equation</div>
+              <div id="chemEquation" class="text-center text-lg min-h-[60px] flex items-center justify-center">—</div>
+            </div>
+            <div class="rounded-2xl p-4 bg-white/5 border border-white/10 mt-3">
+              <div class="text-xs text-[var(--muted)] mb-1">What happened</div>
+              <div id="chemDesc" class="text-sm min-h-[48px]">Select reagents and mix to see the reaction.</div>
+            </div>
+            <div class="rounded-2xl p-4 bg-white/5 border border-white/10 mt-3">
+              <div class="text-xs text-[var(--muted)] mb-2">Reaction log</div>
+              <div id="chemLog" class="text-xs space-y-1 max-h-[110px] overflow-y-auto scroll-thin text-[var(--muted)]">No reactions yet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BIOLOGY LAB ===================== -->
+  <section data-panel="biology" class="panel hidden">
+    <div class="glass rounded-3xl p-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-xl font-black">🦋 Virtual Anatomy Explorer</h2>
+          <p class="text-xs text-[var(--muted)]">Pick a creature, click any glowing body part, learn a fun fact, and answer an <b>AI-generated</b> mini-quiz for XP.</p>
+        </div>
+        <div class="flex gap-2">
+          <button data-animal="fish" class="animal-btn active px-4 py-2 rounded-xl text-sm font-semibold">🐟 Fish</button>
+          <button data-animal="bird" class="animal-btn px-4 py-2 rounded-xl text-sm font-semibold">🐦 Bird</button>
+          <button data-animal="rabbit" class="animal-btn px-4 py-2 rounded-xl text-sm font-semibold">🐰 Rabbit</button>
+        </div>
+      </div>
+      <div class="grid lg:grid-cols-3 gap-5">
+        <div class="lg:col-span-2 rounded-2xl p-4 relative" style="background:linear-gradient(180deg,#0a1230,#1a2a4a);">
+          <div id="anatomyHost" class="w-full flex justify-center"></div>
+          <div class="absolute top-4 left-4 text-xs glass px-3 py-1.5 rounded-lg text-[var(--muted)]">Click the glowing parts →</div>
+          <div class="absolute top-4 right-4 text-xs glass px-3 py-1.5 rounded-lg"><span class="text-[var(--muted)]">Quiz mastered:</span> <span id="anatomyProgress" class="font-bold">0 / 0</span></div>
+        </div>
+        <div class="space-y-3">
+          <div class="rounded-2xl p-4 bg-white/5 border border-white/10">
+            <div class="text-xs text-[var(--muted)] mb-1">Selected part</div>
+            <div id="anatomyName" class="font-bold text-lg">—</div>
+            <div id="anatomyFact" class="text-sm text-[var(--muted)] mt-2 min-h-[60px]">Click any glowing body part on the diagram to learn about it.</div>
+          </div>
+          <div class="rounded-2xl p-4 bg-white/5 border border-white/10">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-xs text-[var(--muted)]">Mini-quiz</div>
+              <button id="aiQuizBtn" class="text-[10px] px-2 py-1 rounded-lg font-semibold" style="background:linear-gradient(135deg,#fbbf24,#f472b6);color:#fff;" disabled>🎲 AI New Question</button>
+            </div>
+            <div id="anatomyQuiz" class="text-sm font-semibold min-h-[40px]">—</div>
+            <div id="anatomyOpts" class="grid grid-cols-1 gap-2 mt-3"></div>
+            <div id="anatomyFeedback" class="text-xs mt-2 min-h-[18px]"></div>
+          </div>
+          <div class="rounded-2xl p-4 bg-white/5 border border-white/10">
+            <div class="text-xs text-[var(--muted)] mb-2">Explore next</div>
+            <div class="flex gap-2 flex-wrap">
+              <button class="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15" onclick="switchAnimal('fish')">🐟 Fish</button>
+              <button class="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15" onclick="switchAnimal('bird')">🐦 Bird</button>
+              <button class="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15" onclick="switchAnimal('rabbit')">🐰 Rabbit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== AI STUDY BUDDY ===================== -->
+  <section data-panel="aibuddy" class="panel hidden">
+    <div class="glass rounded-3xl p-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-2xl font-black">🤖 AI Study Buddy</h2>
+          <p class="text-[var(--muted)] text-sm">Type any topic — get an instant AI-generated lesson, quiz & flashcards. <span class="ai-text font-semibold">Powered by Google Gemini</span></p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-3 mb-5">
+        <div class="md:col-span-2 flex gap-2">
+          <input id="buddyTopic" type="text" placeholder="e.g. photosynthesis, black holes, the Pythagorean theorem..."
+                 class="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--ai)]" />
+          <button id="buddyGo" class="px-6 py-3 rounded-xl font-bold text-white whitespace-nowrap" style="background:linear-gradient(135deg,#fbbf24,#f472b6)">✨ Generate</button>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button class="text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15" onclick="document.getElementById('buddyTopic').value='Newton's laws of motion';generateBuddy()">Newton's Laws</button>
+          <button class="text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15" onclick="document.getElementById('buddyTopic').value='DNA replication';generateBuddy()">DNA</button>
+          <button class="text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15" onclick="document.getElementById('buddyTopic').value='fractions';generateBuddy()">Fractions</button>
+        </div>
+      </div>
+
+      <div id="buddyStatus" class="text-sm text-[var(--muted)] mb-4">💡 Try one of the example topics above, or type your own. Each lesson earns you +50 XP!</div>
+
+      <div id="buddyOutput" class="hidden grid lg:grid-cols-3 gap-5">
+        <!-- Lesson -->
+        <div class="lg:col-span-2 rounded-2xl p-5 bg-white/5 border border-white/10">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-2xl">📚</span>
+            <h3 id="buddyTitle" class="text-xl font-black grad-text">—</h3>
+          </div>
+          <div id="buddyLesson" class="text-sm leading-relaxed text-[var(--ink)] space-y-2"></div>
+          <div class="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="rounded-lg p-2 bg-white/5"><div class="text-[var(--muted)]">Difficulty</div><div id="buddyDiff" class="font-bold" style="color:var(--ai)">—</div></div>
+            <div class="rounded-lg p-2 bg-white/5"><div class="text-[var(--muted)]">Read time</div><div id="buddyTime" class="font-bold" style="color:var(--accent2)">—</div></div>
+            <div class="rounded-lg p-2 bg-white/5"><div class="text-[var(--muted)]">Key points</div><div id="buddyKeys" class="font-bold" style="color:var(--accent3)">—</div></div>
+          </div>
+        </div>
+        <!-- Flashcards -->
+        <div class="rounded-2xl p-5 bg-white/5 border border-white/10">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2"><span class="text-xl">🎴</span><h3 class="font-bold">Flashcards</h3></div>
+            <span id="flashIdx" class="text-xs text-[var(--muted)]">1/5</span>
+          </div>
+          <div class="flashcard h-40 w-full" id="flashcard" onclick="flipFlash()">
+            <div class="flashcard-inner w-full h-full relative">
+              <div class="flashcard-face flashcard-front" id="flashFront">Tap to start</div>
+              <div class="flashcard-face flashcard-back" id="flashBack">—</div>
+            </div>
+          </div>
+          <div class="flex justify-between mt-3">
+            <button class="text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15" onclick="prevFlash()">← Prev</button>
+            <button class="text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15" onclick="nextFlash()">Next →</button>
+          </div>
+        </div>
+        <!-- Quiz -->
+        <div class="lg:col-span-3 rounded-2xl p-5 bg-white/5 border border-white/10">
+          <div class="flex items-center gap-2 mb-3"><span class="text-xl">🎯</span><h3 class="font-bold">Test Yourself — AI Quiz</h3></div>
+          <div id="buddyQuiz" class="space-y-4"></div>
+          <button id="buddySubmit" class="mt-4 px-6 py-2.5 rounded-xl font-bold text-white" style="background:linear-gradient(135deg,var(--accent),var(--accent2))">Check Answers</button>
+          <div id="buddyScore" class="mt-3 text-sm font-bold"></div>
+        </div>
+      </div>
+
+      <div id="buddyLoading" class="hidden text-center py-10">
+        <div class="inline-block text-4xl mb-3 animate-bounce">🤖</div>
+        <div class="text-sm text-[var(--muted)]">AI is preparing your lesson…</div>
+        <div class="typing mt-2"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="max-w-7xl mx-auto px-4 sm:px-6 py-8 text-center text-xs text-[var(--muted)]">
+  MindPulse AI · Physics · Chemistry · Biology · AI Buddy · Built with vanilla JS, Tailwind, KaTeX & Google Gemini
+</footer>
+
+<!-- ===================== AI TUTOR CHAT (floating) ===================== -->
+<button id="aiChatFab" title="Ask AI Tutor">
+  🤖
+  <span id="aiDot" class="dot off"></span>
+</button>
+<div id="aiChatPanel">
+  <div class="p-3 flex items-center justify-between" style="background:linear-gradient(135deg,#fbbf24,#f472b6);">
+    <div class="flex items-center gap-2 text-white font-bold text-sm">🤖 AI Tutor <span id="aiChatContext" class="text-[10px] font-normal opacity-80"></span></div>
+    <button onclick="toggleAiChat()" class="text-white text-xl leading-none">✕</button>
+  </div>
+  <div id="chatMessages" class="flex-1 overflow-y-auto p-3 space-y-2 scroll-thin" style="background:var(--bg2);"></div>
+  <div id="chatQuickWrap" class="p-2 border-t border-white/10" style="background:var(--bg);">
+    <div class="text-[10px] text-[var(--muted)] px-1 mb-1 flex items-center justify-between">
+      <span>💡 Tap a question to learn</span>
+      <button onclick="toggleCustomInput()" class="text-[10px] text-[var(--ai)] font-semibold">⌨️ Type own</button>
+    </div>
+    <div id="chatQuickList" class="grid grid-cols-1 gap-1 max-h-[200px] overflow-y-auto scroll-thin"></div>
+  </div>
+  <div id="chatCustomWrap" class="p-3 border-t border-white/10 gap-2 hidden">
+    <input id="chatInput" type="text" placeholder="Type your question — opens in Google Gemini…" class="flex-1 bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--ai)] w-full mb-2" />
+    <div class="flex gap-2">
+      <button onclick="toggleCustomInput()" class="px-3 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/15 text-xs">← Back</button>
+      <button id="chatSend" class="flex-1 px-4 py-2 rounded-xl font-bold text-white text-sm" style="background:linear-gradient(135deg,#fbbf24,#f472b6)">🌐 Ask Gemini</button>
+    </div>
+    <div class="text-[10px] text-[var(--muted)] mt-1 text-center">Opens gemini.google.com in a new tab with your question</div>
+  </div>
+</div>
+
+<!-- ===================== AI SETTINGS MODAL ===================== -->
+<div id="aiSettingsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+  <div class="glass rounded-3xl p-6 max-w-md w-[92%] pop">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-black ai-text">🤖 AI Settings</h3>
+      <button onclick="closeAiSettings()" class="text-[var(--muted)] hover:text-white text-xl">✕</button>
+    </div>
+    <div class="text-sm space-y-4">
+      <div>
+        <label class="block text-xs font-semibold mb-2">AI Provider</label>
+        <select id="aiProvider" class="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm">
+          <option value="gemini">Google Gemini (free, recommended)</option>
+          <option value="openai">OpenAI-compatible (Groq, OpenAI, etc.)</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold mb-2">API Key</label>
+        <input id="aiKeyInput" type="password" placeholder="Paste your API key here…" class="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--ai)]" />
+        <p class="text-[10px] text-[var(--muted)] mt-1">Stored only in your browser's localStorage. Never sent anywhere except the AI provider.</p>
+      </div>
+      <div id="aiEndpointWrap" class="hidden">
+        <label class="block text-xs font-semibold mb-2">API Endpoint (for OpenAI-compatible)</label>
+        <input id="aiEndpointInput" type="text" placeholder="https://api.groq.com/openai/v1/chat/completions" class="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold mb-2">Model</label>
+        <input id="aiModelInput" type="text" placeholder="gemini-1.5-flash" class="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm" />
+      </div>
+      <div class="rounded-xl p-3 bg-white/5 text-xs space-y-2">
+        <div class="font-semibold ai-text">📋 How to get a free Gemini key:</div>
+        <ol class="text-[var(--muted)] space-y-1 list-decimal list-inside">
+          <li>Visit <span class="text-[var(--ink)]">aistudio.google.com</span></li>
+          <li>Sign in with a Google account</li>
+          <li>Click "Get API key" → "Create API key"</li>
+          <li>Copy and paste it above</li>
+        </ol>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="saveAiSettings()" class="flex-1 py-2.5 rounded-xl font-bold text-white" style="background:linear-gradient(135deg,#fbbf24,#f472b6)">Save</button>
+        <button onclick="clearAiSettings()" class="px-4 py-2.5 rounded-xl font-semibold bg-white/10 hover:bg-white/15">Clear</button>
+      </div>
+      <div id="aiTestResult" class="text-xs min-h-[18px]"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== LEVEL-UP MODAL ===================== -->
+<div id="levelModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+  <div class="glass rounded-3xl p-8 max-w-sm w-[90%] text-center pop glow">
+    <div class="text-6xl mb-3">🎉</div>
+    <h3 class="text-2xl font-black grad-text">Level Up!</h3>
+    <p class="text-[var(--muted)] mt-1">You reached</p>
+    <div id="modalLvl" class="text-5xl font-black my-2" style="color:var(--accent2)">Level 2</div>
+    <p class="text-sm text-[var(--muted)] mb-5">Keep experimenting, keep learning.</p>
+    <button onclick="closeLevelModal()" class="px-6 py-2.5 rounded-xl font-bold text-white w-full" style="background:linear-gradient(135deg,var(--accent),var(--accent3))">Awesome! 🚀</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-5 left-5 z-50 hidden glass rounded-2xl px-5 py-3 pop">
+  <div class="flex items-center gap-3"><span class="text-2xl">✨</span>
+    <div><div id="toastTitle" class="font-bold text-sm">+50 XP</div><div id="toastMsg" class="text-xs text-[var(--muted)]">Simulation complete!</div></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   MindPulse AI — multi-subject STEM labs + AI features
+   ============================================================ */
+
+/* ---------- Gamification core ---------- */
+const XP_PER_ACTION = 50;
+const levelForXp  = xp => Math.floor(xp/200)+1;
+const xpIntoLevel = xp => xp%200;
+const xpForNextLevel = () => 200;
+const state = {
+  xp: Number(localStorage.getItem('mindpulse_xp')||0),
+  runs: Number(localStorage.getItem('mindpulse_runs')||0),
+  lastLevel: levelForXp(Number(localStorage.getItem('mindpulse_xp')||0)),
+  bioSolved: JSON.parse(localStorage.getItem('mindpulse_bio')||'{}'),
+  chemDiscovered: JSON.parse(localStorage.getItem('mindpulse_chem')||'[]')
+};
+function saveState(){
+  localStorage.setItem('mindpulse_xp', state.xp);
+  localStorage.setItem('mindpulse_runs', state.runs);
+  localStorage.setItem('mindpulse_bio', JSON.stringify(state.bioSolved));
+  localStorage.setItem('mindpulse_chem', JSON.stringify(state.chemDiscovered));
+}
+function renderXp(){
+  const lvl = levelForXp(state.xp);
+  const into = xpIntoLevel(state.xp);
+  const pct = (into/xpForNextLevel())*100;
+  document.getElementById('xpBar').style.width = pct+'%';
+  document.getElementById('xpText').textContent = into;
+  document.getElementById('xpNext').textContent = xpForNextLevel();
+  document.getElementById('lvlBadge').textContent = 'Level '+lvl;
+  document.getElementById('statXP').textContent = state.xp;
+  document.getElementById('statLvl').textContent = lvl;
+  document.getElementById('statRuns').textContent = state.runs;
+  if(lvl > state.lastLevel){ state.lastLevel = lvl; showLevelModal(lvl); }
+  saveState();
+}
+function awardXp(reason){
+  state.xp += XP_PER_ACTION; state.runs += 1; renderXp();
+  showToast('+'+XP_PER_ACTION+' XP', reason||'Nice work!');
+}
+function showToast(title,msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.remove('hidden'); t.classList.add('pop');
+  clearTimeout(window.__toastT);
+  window.__toastT = setTimeout(()=>t.classList.add('hidden'), 2600);
+}
+function showLevelModal(lvl){
+  document.getElementById('modalLvl').textContent = 'Level '+lvl;
+  const m = document.getElementById('levelModal');
+  m.classList.remove('hidden'); m.classList.add('flex');
+  fireConfetti();
+}
+function closeLevelModal(){
+  document.getElementById('levelModal').classList.add('hidden');
+  document.getElementById('levelModal').classList.remove('flex');
+}
+function fireConfetti(){
+  const colors=['#7c5cff','#22d3ee','#f472b6','#fbbf24','#34d399'];
+  for(let i=0;i<80;i++){
+    const c=document.createElement('div'); c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colors[i%colors.length];
+    document.body.appendChild(c);
+    const dur=1800+Math.random()*1400;
+    c.animate([
+      {transform:`translateY(0) rotate(0deg)`,opacity:1},
+      {transform:`translateY(105vh) rotate(${720+Math.random()*720}deg)`,opacity:.9}
+    ],{duration:dur,easing:'cubic-bezier(.2,.6,.2,1)'});
+    setTimeout(()=>c.remove(),dur);
+  }
+}
+
+/* ---------- Tab navigation ---------- */
+function goTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=>{
+    const on = p.dataset.panel===name;
+    p.classList.toggle('hidden', !on);
+    if(on) p.classList.add('fade-in');
+  });
+  updateAiChatContext();
+  if(name==='physics' || name==='chemistry'){
+    if(window.renderMathInElement){
+      try{ renderMathInElement(document.querySelector(`[data-panel="${name}"]`),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]}); }catch(e){}
+    }
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>goTab(b.dataset.tab)));
+
+/* ============================================================
+   AI CORE — Gemini / OpenAI-compatible, with demo fallback
+   ============================================================ */
+const aiSettings = {
+  provider: localStorage.getItem('mp_ai_provider') || 'gemini',
+  key: localStorage.getItem('mp_ai_key') || '',
+  endpoint: localStorage.getItem('mp_ai_endpoint') || 'https://api.groq.com/openai/v1/chat/completions',
+  model: localStorage.getItem('mp_ai_model') || 'gemini-1.5-flash'
+};
+function aiIsConfigured(){ return !!aiSettings.key; }
+function updateAiStatusUI(){
+  const dot = document.getElementById('aiDot');
+  const bannerT = document.getElementById('aiBannerTitle');
+  const bannerM = document.getElementById('aiBannerMsg');
+  if(aiIsConfigured()){
+    dot.className = 'dot on';
+    if(bannerT){ bannerT.textContent='AI: Connected ('+aiSettings.provider+')'; bannerM.textContent='AI features are live. Try the AI Study Buddy or the floating tutor!'; }
+  } else {
+    dot.className = 'dot off';
+    if(bannerT){ bannerT.textContent='AI: Demo Mode'; bannerM.textContent='Click ⚙️ to add a free Google Gemini API key and unlock real AI responses.'; }
+  }
+}
+async function callAI(prompt, systemContext){
+  if(!aiIsConfigured()) return demoResponse(prompt);
+  const sys = systemContext || 'You are MindPulse AI, a friendly STEM tutor for students. Be concise, accurate, and encouraging. Use simple language.';
+  if(aiSettings.provider==='gemini'){
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${aiSettings.model}:generateContent?key=${aiSettings.key}`;
+    const body = {
+      contents:[{role:'user',parts:[{text: sys+'\n\n'+prompt}]}],
+      generationConfig:{temperature:0.7, maxOutputTokens:1500}
+    };
+    const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!res.ok){ const e=await res.text(); throw new Error('Gemini error: '+e); }
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '(no response)';
+  } else {
+    // OpenAI-compatible
+    const res = await fetch(aiSettings.endpoint,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${aiSettings.key}`},
+      body:JSON.stringify({
+        model: aiSettings.model,
+        messages:[{role:'system',content:sys},{role:'user',content:prompt}],
+        temperature:0.7, max_tokens:1500
+      })
+    });
+    if(!res.ok){ const e=await res.text(); throw new Error('API error: '+e); }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || '(no response)';
+  }
+}
+async function callAIJSON(prompt, systemContext){
+  const raw = await callAI(prompt + '\n\nIMPORTANT: Respond with ONLY valid JSON, no markdown, no code fences. Plain JSON only.', systemContext);
+  // strip any accidental markdown fences
+  const cleaned = raw.replace(/```json|```/g,'').trim();
+  // find the first { and last } in case there's stray text
+  const first = cleaned.indexOf('{');
+  const last = cleaned.lastIndexOf('}');
+  if(first===-1 || last===-1) throw new Error('No JSON in response: '+raw.slice(0,200));
+  return JSON.parse(cleaned.slice(first, last+1));
+}
+/* Demo-mode canned responses so the app works without a key */
+function demoResponse(prompt){
+  const p = prompt.toLowerCase();
+  if(p.includes('45') || p.includes('angle') || p.includes('projectile')){
+    return "**Why 45° gives maximum range**\n\nThe range formula is R = v₀²·sin(2θ)/g. The sine function reaches its maximum value of 1 when its argument is 90°. So sin(2θ)=1 when 2θ=90°, meaning θ=45°. At any other angle, sin(2θ) is smaller, so the range is shorter.\n\n**Try it:** Set the angle to 30° and 60° — you'll get the SAME range (because sin(60°)=sin(120°)), but different max heights!\n\n*(Demo mode — add a Gemini API key in ⚙️ for full AI responses.)*";
+  }
+  if(p.includes('reaction') || p.includes('acid') || p.includes('base') || p.includes('hcl') || p.includes('naoh')){
+    return "**About that reaction**\n\nWhen an acid meets a base, they undergo *neutralization*: H⁺ ions from the acid combine with OH⁻ ions from the base to form water (H₂O). The remaining ions form a salt.\n\nFor HCl + NaOH: the H⁺ from HCl and OH⁻ from NaOH make water, while Na⁺ and Cl⁻ form table salt (NaCl). The solution becomes neutral (pH 7) and slightly warmer.\n\n*(Demo mode — add a Gemini API key for more detail.)*";
+  }
+  if(p.includes('gill') || p.includes('fish')){
+    return "**About fish gills**\n\nGills are feathery organs packed with blood vessels called capillaries. As water flows over them, oxygen dissolved in the water diffuses into the blood, while carbon dioxide diffuses out. This is the opposite of how our lungs work — we extract oxygen from air, fish extract it from water.\n\nA fish constantly opens its mouth and closes its gill covers to keep water flowing — like a living pump!\n\n*(Demo mode — add a Gemini API key for full AI responses.)*";
+  }
+  return "**Demo mode** — I'm showing canned responses because no AI API key is set.\n\nTo unlock real AI conversations, click the ⚙️ button at the top right and paste a free Google Gemini API key (get one at aistudio.google.com).\n\nOnce configured, I can answer ANY question about physics, chemistry, biology, math, and more!";
+}
+
+/* ---------- AI Settings modal ---------- */
+function openAiSettings(){
+  document.getElementById('aiProvider').value = aiSettings.provider;
+  document.getElementById('aiKeyInput').value = aiSettings.key;
+  document.getElementById('aiEndpointInput').value = aiSettings.endpoint;
+  document.getElementById('aiModelInput').value = aiSettings.model;
+  document.getElementById('aiEndpointWrap').classList.toggle('hidden', aiSettings.provider!=='openai');
+  const m = document.getElementById('aiSettingsModal');
+  m.classList.remove('hidden'); m.classList.add('flex');
+}
+function closeAiSettings(){
+  document.getElementById('aiSettingsModal').classList.add('hidden');
+  document.getElementById('aiSettingsModal').classList.remove('flex');
+}
+document.getElementById('aiSettingsBtn').addEventListener('click', openAiSettings);
+document.getElementById('aiProvider').addEventListener('change', e=>{
+  const p = e.target.value;
+  document.getElementById('aiEndpointWrap').classList.toggle('hidden', p!=='openai');
+  document.getElementById('aiModelInput').value = p==='gemini' ? 'gemini-1.5-flash' : 'llama-3.1-8b-instant';
+});
+function saveAiSettings(){
+  aiSettings.provider = document.getElementById('aiProvider').value;
+  aiSettings.key = document.getElementById('aiKeyInput').value.trim();
+  aiSettings.endpoint = document.getElementById('aiEndpointInput').value.trim() || 'https://api.groq.com/openai/v1/chat/completions';
+  aiSettings.model = document.getElementById('aiModelInput').value.trim() || 'gemini-1.5-flash';
+  localStorage.setItem('mp_ai_provider', aiSettings.provider);
+  localStorage.setItem('mp_ai_key', aiSettings.key);
+  localStorage.setItem('mp_ai_endpoint', aiSettings.endpoint);
+  localStorage.setItem('mp_ai_model', aiSettings.model);
+  updateAiStatusUI();
+  const r = document.getElementById('aiTestResult');
+  r.textContent = '✅ Saved. ' + (aiIsConfigured() ? 'AI is now live!' : 'AI still in demo mode (no key set).');
+  r.style.color = aiIsConfigured() ? 'var(--good)' : 'var(--warn)';
+  setTimeout(()=>{ closeAiSettings(); r.textContent=''; }, 1500);
+}
+function clearAiSettings(){
+  aiSettings.key=''; aiSettings.provider='gemini';
+  localStorage.removeItem('mp_ai_key');
+  localStorage.removeItem('mp_ai_provider');
+  document.getElementById('aiKeyInput').value='';
+  updateAiStatusUI();
+  document.getElementById('aiTestResult').textContent='AI key cleared. Back to demo mode.';
+  document.getElementById('aiTestResult').style.color='var(--warn)';
+}
+
+/* ---------- AI Tutor Chat — Quick Questions Mode ---------- */
+let chatHistory = [];
+let currentContext = 'dashboard';
+
+/* 10 curated STEM questions with full answers — works WITHOUT any API key.
+   When user clicks a question, the answer shows instantly (no network delay). */
+const QUICK_QUESTIONS = [
+  { id:'q1', icon:'🚀', q:'Why does a projectile travel furthest at 45°?',
+    a:'**Great physics question!** The range formula is R = v₀²·sin(2θ)/g.\n\nThe sine function reaches its maximum value of 1 when its argument is 90°. So sin(2θ) = 1 when 2θ = 90°, meaning **θ = 45°**.\n\n*Try it in the Physics Lab:* set the angle to 30° and 60° — you\'ll get the SAME range (because sin(60°) = sin(120°)), but different max heights! 🎯' },
+  { id:'q2', icon:'🧪', q:'What happens when an acid meets a base?',
+    a:'**Neutralization!** When an acid (like HCl) meets a base (like NaOH), they react to form a salt and water:\n\n  HCl + NaOH → NaCl + H₂O\n\nThe H⁺ ions from the acid combine with OH⁻ ions from the base to make water (H₂O). The remaining ions form a salt (here, table salt NaCl). The solution becomes neutral (pH 7) and slightly warmer.\n\n*Try it in the Chemistry Lab!* 🧪' },
+  { id:'q3', icon:'🐟', q:'How do fish breathe underwater?',
+    a:'**With gills!** Fish have feathery gills packed with blood vessels called capillaries.\n\nAs water flows into the fish\'s mouth and over the gills, **oxygen dissolved in the water** diffuses into the blood, while carbon dioxide diffuses out. This is the opposite of how our lungs work — we extract oxygen from air, fish extract it from water.\n\nA fish constantly opens its mouth and closes its gill covers to keep water flowing — like a living pump! 🫁' },
+  { id:'q4', icon:'🍎', q:'Why is the sky blue?',
+    a:'**Because of Rayleigh scattering!** Sunlight looks white, but it\'s actually made of all the colors of the rainbow.\n\nWhen sunlight enters Earth\'s atmosphere, it collides with tiny gas molecules (mostly nitrogen and oxygen). These molecules scatter **blue and violet light** much more than red or yellow light, because blue has a shorter wavelength.\n\nOur eyes are more sensitive to blue than violet, so the sky looks blue to us! At sunset, light passes through more atmosphere, so most blue scatters away and we see red/orange. 🌅' },
+  { id:'q5', icon:'⚡', q:'What is Newton\'s First Law of Motion?',
+    a:'**The Law of Inertia:** An object at rest stays at rest, and an object in motion stays in motion at the same speed and in the same direction — **unless acted upon by an unbalanced force.**\n\n*Example:* When a bus suddenly brakes, you lurch forward. Your body was in motion and wants to keep moving — that\'s inertia! The seatbelt is the unbalanced force that stops you.\n\nThis is why rockets need constant thrust in space (no air resistance to slow them, but they still need force to change speed or direction). 🛰️' },
+  { id:'q6', icon:'🔥', q:'Why does hydrogen explode with oxygen?',
+    a:'**Combustion reaction!** Hydrogen (H₂) is extremely flammable, and oxygen (O₂) is the perfect oxidizer.\n\nWhen you add a spark, the H-H and O=O bonds break and reform into water (H₂O), releasing a HUGE amount of energy as heat and light:\n\n  2H₂ + O₂ → 2H₂O + energy 💥\n\nThe reaction is so energetic it was used to power the Saturn V rocket that took astronauts to the Moon! It\'s also why hydrogen-powered cars only emit pure water.\n\n*Try it in the Chemistry Lab — hit Mix after selecting H₂ + O₂!* 🚀' },
+  { id:'q7', icon:'🐦', q:'How do birds fly?',
+    a:'**Four forces work together!** A bird\'s wing is shaped like an airfoil — curved on top, flatter on the bottom.\n\nAs air flows over the wing, it moves **faster over the top** (curved path), which creates **lower pressure** above the wing. Higher pressure below pushes the wing UP — this is **lift**.\n\nFlapping pushes air backward (creating **thrust**), gravity pulls down (**weight**), and air resistance slows them (**drag**). Birds steer by tilting their wings and using their tail feathers like a rudder. 🪶' },
+  { id:'q8', icon:'🧬', q:'What is DNA and what does it do?',
+    a:'**DNA is life\'s instruction manual!** It\'s a tiny twisted ladder (a "double helix") found inside every living cell.\n\nThe "rungs" of the ladder are made of 4 chemical bases represented by letters:\n  • **A** (Adenine) pairs with **T** (Thymine)\n  • **C** (Cytosine) pairs with **G** (Guanine)\n\nThe order of these letters spells out genes — recipes for building proteins, which make your eyes blue, your hair curly, or your blood type O. You have about 3 BILLION letters of DNA in every cell! 🧬' },
+  { id:'q9', icon:'🌊', q:'What is gravity and how does it work?',
+    a:'**Gravity is the force that pulls masses together.** Einstein taught us it\'s actually the **bending of spacetime** by massive objects.\n\nThink of space as a trampoline. Put a heavy bowling ball (Earth) in the middle — it makes a dip. Roll a marble (the Moon) nearby, and it curves around the dip. That\'s an orbit!\n\nOn Earth, gravity accelerates everything at **9.8 m/s²**. So after 1 second of falling, you move at 9.8 m/s; after 2 seconds, 19.6 m/s; and so on.\n\n*Change gravity in the Physics Lab to see how projectiles behave on different planets!* 🪐' },
+  { id:'q10', icon:'🧮', q:'Why is the Pythagorean theorem important?',
+    a:'**It connects algebra and geometry!** For any right triangle, a² + b² = c², where c is the hypotenuse (the longest side, opposite the right angle).\n\n*Example:* If two sides are 3 and 4, then 9 + 16 = 25, so c = 5.\n\nThis is HUGE in real life:\n  • **GPS** uses it to calculate distances\n  • **Construction** — builders use the 3-4-5 trick to make perfect right angles\n  • **Video games** — calculating distances between characters\n  • **Navigation** — shortest path between two points\n\nIt\'s over 2,500 years old and still used every day! 📐' }
+];
+
+function updateAiChatContext(){
+  const active = document.querySelector('.tab-btn.active');
+  if(!active) return;
+  const tab = active.dataset.tab;
+  const labels = {dashboard:'General',physics:'Physics Lab',chemistry:'Chemistry Lab',biology:'Biology Lab',aibuddy:'AI Study Buddy'};
+  currentContext = tab;
+  document.getElementById('aiChatContext').textContent = '· '+(labels[tab]||'');
+}
+function toggleAiChat(){
+  const p = document.getElementById('aiChatPanel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open') && chatHistory.length===0){
+    addChatMsg('ai', "👋 Welcome! I\'m your AI Tutor. Tap any question below to get an instant answer — no waiting, no API key needed!");
+    chatHistory.push({role:'ai',text:'greeting'});
+    renderQuickQuestions();
+  }
+}
+document.getElementById('aiChatFab').addEventListener('click', toggleAiChat);
+
+function renderQuickQuestions(){
+  const host = document.getElementById('chatQuickList');
+  host.innerHTML = '';
+  QUICK_QUESTIONS.forEach((item, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'qchip text-left text-xs px-2.5 py-2 rounded-lg bg-white/5 hover:bg-white/12 border border-white/10 flex items-start gap-2 transition-colors';
+    btn.innerHTML = `<span class="text-base leading-none mt-0.5">${item.icon}</span><span class="flex-1"><span class="text-[var(--muted)] text-[9px]">Q${i+1}</span><br><span class="font-semibold leading-tight">${item.q}</span></span>`;
+    btn.addEventListener('click', () => answerQuickQuestion(item));
+    host.appendChild(btn);
+  });
+}
+
+function answerQuickQuestion(item){
+  // Show the user\'s question
+  addChatMsg('user', item.q);
+  chatHistory.push({role:'user',text:item.q});
+  // Tiny delay for natural feel (no API call — answer is local)
+  const typingEl = document.createElement('div');
+  typingEl.className='chat-msg ai';
+  typingEl.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  document.getElementById('chatMessages').appendChild(typingEl);
+  document.getElementById('chatMessages').scrollTop = 99999;
+  setTimeout(() => {
+    typingEl.remove();
+    addChatMsg('ai', item.a);
+    chatHistory.push({role:'ai',text:item.a});
+    // Award XP the first time a question is asked
+    if(!state.askedQuestions) state.askedQuestions = [];
+    if(!state.askedQuestions.includes(item.id)){
+      state.askedQuestions.push(item.id);
+      awardXp('Question answered: '+item.q.slice(0,40)+'…');
+    }
+  }, 400);
+}
+
+function toggleCustomInput(){
+  const quick = document.getElementById('chatQuickWrap');
+  const custom = document.getElementById('chatCustomWrap');
+  const isCustomHidden = custom.classList.contains('hidden');
+  if(isCustomHidden){
+    custom.classList.remove('hidden');
+    custom.classList.add('flex');
+    custom.style.flexDirection = 'column';
+    quick.classList.add('hidden');
+    document.getElementById('chatInput').focus();
+  } else {
+    custom.classList.add('hidden');
+    custom.classList.remove('flex');
+    quick.classList.remove('hidden');
+  }
+}
+
+function addChatMsg(who, text){
+  const host = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg '+who;
+  // simple markdown: **bold** and *italic* and newlines
+  div.innerHTML = text
+    .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
+    .replace(/\*(.+?)\*/g,'<i>$1</i>')
+    .replace(/\n/g,'<br>');
+  host.appendChild(div);
+  host.scrollTop = host.scrollHeight;
+  return div;
+}
+async function sendChat(){
+  const inp = document.getElementById('chatInput');
+  const msg = inp.value.trim();
+  if(!msg) return;
+  inp.value='';
+  addChatMsg('user', msg);
+  chatHistory.push({role:'user',text:msg});
+  // Show a friendly message that we're opening Gemini web
+  addChatMsg('ai', "🌐 Opening **Google Gemini** in a new tab with your question… You'll get a full AI answer there — come back here anytime to ask more!");
+  chatHistory.push({role:'ai',text:'redirect'});
+  // Open Gemini web with the question pre-filled (Gemini accepts the q= param)
+  const geminiUrl = 'https://gemini.google.com/app?q=' + encodeURIComponent(msg);
+  window.open(geminiUrl, '_blank', 'noopener,noreferrer');
+  // Switch back to quick questions after a short delay
+  setTimeout(() => { toggleCustomInput(); }, 1200);
+}
+document.getElementById('chatSend').addEventListener('click', sendChat);
+document.getElementById('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendChat(); });
+function askAiAbout(topic){
+  if(!document.getElementById('aiChatPanel').classList.contains('open')) toggleAiChat();
+  // Map to one of the quick questions
+  const map = { physics:'q1', chemistry:'q2' };
+  const id = map[topic];
+  if(id){
+    const item = QUICK_QUESTIONS.find(q => q.id === id);
+    if(item) setTimeout(() => answerQuickQuestion(item), 300);
+  } else {
+    // fall back to typing mode
+    toggleCustomInput();
+    document.getElementById('chatInput').value = 'Give me one cool STEM fact.';
+    sendChat();
+  }
+}
+
+/* ============================================================
+   PHYSICS LAB — Projectile Motion
+   ============================================================ */
+const physCanvas = document.getElementById('physCanvas');
+const pctx = physCanvas.getContext('2d');
+let phys={ angle:45, v0:40, g:9.8, trail:true, running:false, ballIdx:0 };
+function resizeCanvas(cv){ const r=cv.getBoundingClientRect(); cv.width=r.width*devicePixelRatio; cv.height=r.height*devicePixelRatio; }
+function physReadouts(){
+  const v=phys.v0, a=phys.angle*Math.PI/180, g=phys.g;
+  const T=(2*v*Math.sin(a))/g, R=(v*v*Math.sin(2*a))/g, H=(v*v*Math.sin(a)*Math.sin(a))/(2*g);
+  document.getElementById('rRange').textContent  = R.toFixed(1)+' m';
+  document.getElementById('rHeight').textContent = H.toFixed(1)+' m';
+  document.getElementById('rTime').textContent   = T.toFixed(2)+' s';
+  const note=document.getElementById('challengeNote');
+  if(R>=80){ note.innerHTML='✅ <b>Challenge complete!</b> Range ≥ 80 m.'; note.style.color='var(--good)'; }
+  else { note.innerHTML='💡 Challenge: reach a range of <b>80 m</b> for bonus XP.'; note.style.color='var(--muted)'; }
+}
+function computeTrajectory(){
+  const v=phys.v0, a=phys.angle*Math.PI/180, g=phys.g;
+  const T=(2*v*Math.sin(a))/g, pts=[]; const steps=240;
+  for(let i=0;i<=steps;i++){ const t=(i/steps)*T; pts.push({x:v*Math.cos(a)*t, y:v*Math.sin(a)*t - 0.5*g*t*t, t}); }
+  return {pts,T};
+}
+function drawPhysics(){
+  resizeCanvas(physCanvas);
+  const W=physCanvas.width, H=physCanvas.height;
+  pctx.clearRect(0,0,W,H); pctx.save(); pctx.scale(devicePixelRatio,devicePixelRatio);
+  const w=W/devicePixelRatio, h=H/devicePixelRatio;
+  const groundY=h-40;
+  const grad=pctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'rgba(124,92,255,0.05)'); grad.addColorStop(1,'rgba(34,211,238,0.02)');
+  pctx.fillStyle=grad; pctx.fillRect(0,0,w,h);
+  pctx.strokeStyle='rgba(255,255,255,0.05)'; pctx.lineWidth=1;
+  for(let x=0;x<w;x+=40){ pctx.beginPath();pctx.moveTo(x,0);pctx.lineTo(x,h);pctx.stroke(); }
+  for(let y=0;y<h;y+=40){ pctx.beginPath();pctx.moveTo(0,y);pctx.lineTo(w,y);pctx.stroke(); }
+  pctx.strokeStyle='rgba(255,255,255,0.25)'; pctx.lineWidth=2;
+  pctx.beginPath(); pctx.moveTo(0,groundY); pctx.lineTo(w,groundY); pctx.stroke();
+  const traj = computeTrajectory(), pts = traj.pts;
+  if(pts.length<2){ pctx.restore(); return; }
+  const maxX = Math.max(...pts.map(p=>p.x), 1), maxY = Math.max(...pts.map(p=>p.y), 1);
+  const padL=50, padR=20, padT=30;
+  const scaleX=(w-padL-padR)/Math.max(maxX,10), scaleY=(groundY-padT)/Math.max(maxY,10);
+  const scale=Math.min(scaleX,scaleY);
+  const toPx=(p)=>({x:padL+p.x*scale, y:groundY-p.y*scale});
+  if(phys.trail){
+    pctx.strokeStyle='rgba(124,92,255,0.5)'; pctx.lineWidth=2.5; pctx.setLineDash([6,5]);
+    pctx.beginPath();
+    pts.forEach((p,i)=>{ const s=toPx(p); if(i===0)pctx.moveTo(s.x,s.y); else pctx.lineTo(s.x,s.y); });
+    pctx.stroke(); pctx.setLineDash([]);
+  }
+  const idx = phys.running ? phys.ballIdx : pts.length-1;
+  pctx.strokeStyle='rgba(34,211,238,0.95)'; pctx.lineWidth=3; pctx.beginPath();
+  for(let i=0;i<=idx && i<pts.length;i++){ const s=toPx(pts[i]); if(i===0)pctx.moveTo(s.x,s.y); else pctx.lineTo(s.x,s.y); }
+  pctx.stroke();
+  const cx=padL, cy=groundY;
+  pctx.save(); pctx.translate(cx,cy); pctx.rotate(-phys.angle*Math.PI/180);
+  pctx.fillStyle='#7c5cff'; pctx.fillRect(0,-7,34,14); pctx.restore();
+  pctx.beginPath(); pctx.arc(cx,cy,12,0,Math.PI*2); pctx.fillStyle='#1b2450'; pctx.fill();
+  pctx.lineWidth=2; pctx.strokeStyle='#7c5cff'; pctx.stroke();
+  const bp = pts[Math.min(idx,pts.length-1)], bs = toPx(bp), r=8;
+  const bg=pctx.createRadialGradient(bs.x-2,bs.y-2,1,bs.x,bs.y,r);
+  bg.addColorStop(0,'#fff'); bg.addColorStop(0.4,'#f472b6'); bg.addColorStop(1,'#7c5cff');
+  pctx.beginPath(); pctx.arc(bs.x,bs.y,r,0,Math.PI*2); pctx.fillStyle=bg; pctx.fill();
+  pctx.fillStyle='rgba(255,255,255,0.5)'; pctx.font='11px Inter, sans-serif';
+  pctx.fillText('Distance (m) →', padL, h-12);
+  pctx.save(); pctx.translate(14, groundY-10); pctx.rotate(-Math.PI/2); pctx.fillText('Height (m) ↑',0,0); pctx.restore();
+  pctx.restore();
+}
+function animatePhysics(){
+  if(!phys.running) return;
+  phys.ballIdx += 4;
+  const traj=computeTrajectory();
+  if(phys.ballIdx>=traj.pts.length-1){
+    phys.ballIdx=traj.pts.length-1; phys.running=false;
+    document.getElementById('launchBtn').textContent='🚀 Launch!';
+    const v=phys.v0, a=phys.angle*Math.PI/180, g=phys.g;
+    const R=(v*v*Math.sin(2*a))/g;
+    awardXp(R>=80?'Great shot — 80m+ range!':'Projectile launched!');
+  }
+  drawPhysics();
+  if(phys.running) requestAnimationFrame(animatePhysics);
+}
+document.getElementById('launchBtn').addEventListener('click',()=>{
+  if(phys.running) return;
+  phys.ballIdx=0; phys.running=true;
+  document.getElementById('launchBtn').textContent='Launching…';
+  animatePhysics();
+});
+document.getElementById('resetPhysBtn').addEventListener('click',()=>{
+  phys.running=false; phys.ballIdx=0; phys.angle=45; phys.v0=40; phys.g=9.8;
+  document.getElementById('ang').value=45; document.getElementById('vel').value=40; document.getElementById('grav').value=9.8;
+  syncPhysLabels(); physReadouts(); drawPhysics();
+});
+document.getElementById('trailBtn').addEventListener('click',function(){
+  phys.trail=!phys.trail; this.textContent='Trail: '+(phys.trail?'On':'Off'); drawPhysics();
+});
+function syncPhysLabels(){
+  document.getElementById('angVal').textContent=phys.angle+'°';
+  document.getElementById('velVal').textContent=phys.v0+' m/s';
+  document.getElementById('gravVal').textContent=phys.g.toFixed(1)+' m/s²';
+}
+document.getElementById('ang').addEventListener('input',e=>{ phys.angle=+e.target.value; syncPhysLabels(); physReadouts(); if(!phys.running){phys.ballIdx=computeTrajectory().pts.length-1;} drawPhysics(); });
+document.getElementById('vel').addEventListener('input',e=>{ phys.v0=+e.target.value; syncPhysLabels(); physReadouts(); if(!phys.running){phys.ballIdx=computeTrajectory().pts.length-1;} drawPhysics(); });
+document.getElementById('grav').addEventListener('input',e=>{ phys.g=+e.target.value; syncPhysLabels(); physReadouts(); if(!phys.running){phys.ballIdx=computeTrajectory().pts.length-1;} drawPhysics(); });
+
+/* ============================================================
+   CHEMISTRY LAB — Mixing Station
+   ============================================================ */
+const reagents = [
+  { symbol:'HCl',   name:'Hydrochloric Acid', color:'#fbbf24', kind:'acid' },
+  { symbol:'NaOH',  name:'Sodium Hydroxide',  color:'#a78bfa', kind:'base' },
+  { symbol:'H₂',    name:'Hydrogen Gas',      color:'#e5e7eb', kind:'gas' },
+  { symbol:'O₂',    name:'Oxygen Gas',        color:'#60a5fa', kind:'gas' },
+  { symbol:'Mg',    name:'Magnesium Metal',   color:'#d1d5db', kind:'metal' },
+  { symbol:'Na',    name:'Sodium Metal',      color:'#f3f4f6', kind:'metal' },
+  { symbol:'Fe',    name:'Iron Metal',        color:'#9ca3af', kind:'metal' },
+  { symbol:'H₂O',   name:'Water',             color:'#22d3ee', kind:'liquid' },
+  { symbol:'CH₄',   name:'Methane',           color:'#34d399', kind:'gas' },
+  { symbol:'CH₃COOH', name:'Vinegar (Acetic Acid)', color:'#fbbf24', kind:'acid' },
+  { symbol:'NaHCO₃', name:'Baking Soda',      color:'#fde68a', kind:'solid' },
+  { symbol:'Cu',    name:'Copper',            color:'#fb923c', kind:'metal' },
+  { symbol:'AgNO₃', name:'Silver Nitrate',    color:'#e5e7eb', kind:'salt' }
+];
+const reactions = {
+  'HCl+NaOH':{ eq:'\\mathrm{HCl + NaOH \\rightarrow NaCl + H_2O}', desc:'Neutralization! The strong acid and strong base cancel each other out, producing table salt and water. The solution warms up.', color:'#a7f3d0', bubbles:8, flash:false, name:'Acid-Base Neutralization' },
+  'H₂+O₂':{ eq:'\\mathrm{2H_2 + O_2 \\rightarrow 2H_2O}', desc:'Combustion! Hydrogen ignites with oxygen in a fiery explosion, leaving behind pure water vapor.', color:'#22d3ee', bubbles:20, flash:true, name:'Hydrogen Combustion' },
+  'Mg+O₂':{ eq:'\\mathrm{2Mg + O_2 \\rightarrow 2MgO}', desc:'Brilliant white light! Magnesium burns intensely in oxygen to form magnesium oxide — the same bright flare used in old camera flashes.', color:'#f8fafc', bubbles:6, flash:true, name:'Magnesium Combustion' },
+  'H₂O+Na':{ eq:'\\mathrm{2Na + 2H_2O \\rightarrow 2NaOH + H_2}', desc:'Explosive! Sodium reacts violently with water, fizzing off hydrogen gas that often ignites. Do NOT try this at home.', color:'#fde047', bubbles:30, flash:true, name:'Sodium + Water' },
+  'Fe+O₂':{ eq:'\\mathrm{4Fe + 3O_2 \\rightarrow 2Fe_2O_3}', desc:'Rust in action! Iron slowly oxidizes with oxygen to form reddish-brown iron(III) oxide — better known as rust.', color:'#b45309', bubbles:4, flash:false, name:'Iron Oxidation' },
+  'CH₄+O₂':{ eq:'\\mathrm{CH_4 + 2O_2 \\rightarrow CO_2 + 2H_2O}', desc:'Clean combustion! Methane (natural gas) burns with a blue flame, releasing carbon dioxide and water vapor — and a lot of heat.', color:'#60a5fa', bubbles:14, flash:true, name:'Methane Combustion' },
+  'CH₃COOH+NaHCO₃':{ eq:'\\mathrm{CH_3COOH + NaHCO_3 \\rightarrow CH_3COONa + H_2O + CO_2}', desc:'Volcano time! Vinegar meets baking soda and erupts with carbon dioxide bubbles — the classic science-fair fizz.', color:'#fbbf24', bubbles:36, flash:false, name:'Baking Soda + Vinegar' },
+  'AgNO₃+Cu':{ eq:'\\mathrm{Cu + 2AgNO_3 \\rightarrow Cu(NO_3)_2 + 2Ag}', desc:'Single displacement! Copper kicks silver out of solution — the liquid turns blue (copper nitrate) and shiny silver crystals grow on the copper.', color:'#3b82f6', bubbles:5, flash:false, name:'Copper + Silver Nitrate' }
+};
+let chemSlots = [null, null];
+const reagentGrid = document.getElementById('reagentGrid');
+function renderReagents(){
+  reagentGrid.innerHTML = '';
+  reagents.forEach(r=>{
+    const btn = document.createElement('button');
+    btn.className = 'reagent-chip rounded-xl p-2 text-center bg-white/5 border border-white/10';
+    btn.innerHTML = `<div class="text-base font-black" style="color:${r.color}">${r.symbol}</div><div class="text-[9px] text-[var(--muted)] mt-0.5 leading-tight">${r.name.split('(')[0]}</div>`;
+    btn.dataset.symbol = r.symbol;
+    btn.addEventListener('click',()=>toggleReagent(r));
+    reagentGrid.appendChild(btn);
+  });
+}
+function toggleReagent(r){
+  const idx = chemSlots.findIndex(s=>s && s.symbol===r.symbol);
+  if(idx>=0){ chemSlots[idx]=null; }
+  else {
+    const empty = chemSlots.findIndex(s=>s===null);
+    if(empty===-1){ showToast('Beaker full','Clear it first'); return; }
+    chemSlots[empty]=r;
+  }
+  updateBeakerUI();
+}
+function updateBeakerUI(){
+  const s1=document.getElementById('slot1'), s2=document.getElementById('slot2');
+  [s1,s2].forEach((el,i)=>{
+    const r=chemSlots[i];
+    if(r){ el.textContent=r.symbol; el.style.background=r.color+'33'; el.style.color=r.color; }
+    else { el.textContent='empty'; el.style.background='rgba(255,255,255,0.05)'; el.style.color='var(--muted)'; }
+  });
+  document.querySelectorAll('.reagent-chip').forEach(c=>{
+    c.classList.toggle('selected', chemSlots.some(s=>s && s.symbol===c.dataset.symbol));
+  });
+  const liquid=document.getElementById('chemLiquid');
+  const count = chemSlots.filter(s=>s).length;
+  if(count===0){ liquid.style.height='0%'; liquid.style.background='#22d3ee'; }
+  else if(count===1){ liquid.style.height='30%'; liquid.style.background=chemSlots[0].color; }
+  else { liquid.style.height='45%'; liquid.style.background = mixColors(chemSlots[0].color, chemSlots[1].color); }
+  document.getElementById('mixBtn').disabled = count<2;
+  document.getElementById('chemStatus').textContent = count===0?'Add two reagents to begin':count===1?'Add one more reagent':'Ready to mix! Hit Mix it.';
+}
+function mixColors(a,b){
+  const p=(c)=>{ c=c.replace('#',''); return [parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)]; };
+  const A=p(a), B=p(b);
+  const m=A.map((v,i)=>Math.round((v+B[i])/2));
+  return '#'+m.map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+function spawnBubbles(n){
+  const host=document.getElementById('chemBubbles'); host.innerHTML='';
+  for(let i=0;i<n;i++){
+    const b=document.createElement('div'); b.className='bubble';
+    const size=4+Math.random()*10;
+    b.style.width=size+'px'; b.style.height=size+'px';
+    b.style.left=(5+Math.random()*90)+'%';
+    b.style.animationDuration=(1.4+Math.random()*1.6)+'s';
+    b.style.animationDelay=(Math.random()*1.2)+'s';
+    host.appendChild(b); setTimeout(()=>b.remove(), 3500);
+  }
+}
+function flashBeaker(){
+  const f=document.getElementById('chemFlash');
+  f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+}
+function mix(){
+  if(chemSlots.includes(null)) return;
+  const key=[...chemSlots].map(r=>r.symbol).sort().join('+');
+  const rxn=reactions[key];
+  const eqEl=document.getElementById('chemEquation'), descEl=document.getElementById('chemDesc');
+  const statusEl=document.getElementById('chemStatus'), liquid=document.getElementById('chemLiquid');
+  if(!rxn){
+    eqEl.textContent='—';
+    descEl.textContent='No reaction occurs between these two reagents. Try a different combination!';
+    statusEl.textContent='❌ No reaction'; statusEl.style.color='var(--bad)';
+    liquid.style.height='45%'; liquid.style.background=mixColors(chemSlots[0].color, chemSlots[1].color);
+    addLog(`❌ ${chemSlots[0].symbol} + ${chemSlots[1].symbol} → no reaction`);
+    showToast('No reaction','Try another pair'); return;
+  }
+  liquid.style.background=rxn.color; liquid.style.height='70%';
+  if(rxn.flash) flashBeaker();
+  if(rxn.bubbles>0) spawnBubbles(rxn.bubbles);
+  eqEl.innerHTML='\\['+rxn.eq+'\\]';
+  if(window.renderMathInElement){
+    try{ renderMathInElement(eqEl,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\[',right:'\\]',display:true}]}); }catch(e){}
+  }
+  descEl.textContent=rxn.desc;
+  statusEl.textContent='✅ '+rxn.name; statusEl.style.color='var(--good)';
+  if(!state.chemDiscovered.includes(key)){
+    state.chemDiscovered.push(key); saveState(); renderDiscovered();
+    addLog(`✨ NEW: ${chemSlots[0].symbol} + ${chemSlots[1].symbol} → ${rxn.name}`);
+    awardXp('New reaction discovered: '+rxn.name);
+  } else {
+    addLog(`🔁 ${chemSlots[0].symbol} + ${chemSlots[1].symbol} → ${rxn.name}`);
+    awardXp(rxn.name+' repeated');
+  }
+}
+function addLog(msg){
+  const log=document.getElementById('chemLog');
+  if(log.textContent.includes('No reactions yet')) log.innerHTML='';
+  const line=document.createElement('div'); line.textContent=msg; log.prepend(line);
+  while(log.children.length>8) log.removeChild(log.lastChild);
+}
+function renderDiscovered(){
+  document.getElementById('discoveredCount').textContent=state.chemDiscovered.length;
+  const list=document.getElementById('discoveredList'); list.innerHTML='';
+  Object.entries(reactions).forEach(([k,r])=>{
+    const found=state.chemDiscovered.includes(k);
+    const chip=document.createElement('span');
+    chip.className='text-[10px] px-1.5 py-0.5 rounded';
+    chip.style.background=found?'rgba(52,211,153,0.2)':'rgba(255,255,255,0.05)';
+    chip.style.color=found?'var(--good)':'var(--muted)';
+    chip.textContent=found?r.name:'???';
+    list.appendChild(chip);
+  });
+}
+document.getElementById('mixBtn').addEventListener('click',mix);
+document.getElementById('clearBeakerBtn').addEventListener('click',()=>{
+  chemSlots=[null,null]; updateBeakerUI();
+  document.getElementById('chemEquation').textContent='—';
+  document.getElementById('chemDesc').textContent='Select reagents and mix to see the reaction.';
+  document.getElementById('chemStatus').textContent='Add two reagents to begin';
+  document.getElementById('chemStatus').style.color='var(--muted)';
+  document.getElementById('chemBubbles').innerHTML='';
+});
+document.getElementById('hintBtn').addEventListener('click',()=>{
+  const undiscovered=Object.keys(reactions).filter(k=>!state.chemDiscovered.includes(k));
+  if(undiscovered.length===0){ showToast('All found!','You discovered every reaction 🎉'); return; }
+  const k=undiscovered[Math.floor(Math.random()*undiscovered.length)];
+  const [a,b]=k.split('+');
+  showToast('Try this combo',`${a} + ${b}`);
+});
+
+/* ============================================================
+   BIOLOGY LAB — Anatomy Explorer (with AI quiz generator)
+   ============================================================ */
+const anatomy = {
+  fish: {
+    name:'Fish',
+    img:'https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/c6542a888128.jpg',
+    // Hotspot positions as % of image (top%, left%) — verified with VLM
+    hotspots:{
+      eye:     { top:48, left:63, label:'Eye' },
+      gills:   { top:50, left:58, label:'Gills' },
+      dorsal:  { top:36, left:50, label:'Dorsal Fin' },
+      pectoral:{ top:58, left:55, label:'Pectoral Fin' }
+    },
+    parts:{
+      eye:{ name:'Eye', fact:'Fish eyes have a spherical lens that focuses by moving closer to or farther from the retina — unlike humans, who focus by changing the lens shape. Most fish see in color!',
+        quiz:{ q:'How do fish focus their eyes?', opts:['By changing lens shape','By moving the lens','By blinking','They cannot focus'], correct:1, exp:'Fish move their spherical lens closer to or farther from the retina to focus.' } },
+      gills:{ name:'Gills', fact:'Gills are feathery organs packed with blood vessels. Water flows in through the mouth, over the gills, and out — oxygen passes into the blood while CO₂ leaves.',
+        quiz:{ q:'What do gills extract from water?', opts:['Carbon dioxide','Nitrogen','Dissolved oxygen','Salt'], correct:2, exp:'Gills absorb dissolved oxygen from water and release carbon dioxide.' } },
+      dorsal:{ name:'Dorsal Fin', fact:'The dorsal fin on top of a fish works like a keel on a boat — it stops the body from rolling side to side while swimming.',
+        quiz:{ q:'What is the main job of the dorsal fin?', opts:['Breathing','Stability','Digestion','Hearing'], correct:1, exp:'The dorsal fin prevents rolling, keeping the fish stable as it swims.' } },
+      pectoral:{ name:'Pectoral Fin', fact:'Pectoral fins act like steering wheels and brakes. Fish tilt and rotate them to turn, stop, or even swim backward.',
+        quiz:{ q:'Pectoral fins are used mainly for…', opts:['Steering and stopping','Pumping blood','Filtering food','Storing fat'], correct:0, exp:'Pectoral fins help fish steer, turn, and brake — like the steering wheel of a car.' } }
+    }
+  },
+  bird: {
+    name:'Bird',
+    img:'https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/6355de050b77.jpg',
+    hotspots:{
+      beak: { top:40, left:40, label:'Beak' },
+      eye:  { top:38, left:35, label:'Eye' },
+      wing: { top:52, left:30, label:'Wing' },
+      tail: { top:62, left:22, label:'Tail Feathers' },
+      legs: { top:75, left:33, label:'Legs & Feet' },
+      heart:{ top:50, left:33, label:'Heart' }
+    },
+    parts:{
+      beak:{ name:'Beak', fact:'A bird’s beak shape tells you what it eats! Short thick beaks crack seeds, long thin beaks probe flowers for nectar, and hooked beaks tear meat.',
+        quiz:{ q:'A long, thin, curved beak is best for…', opts:['Cracking seeds','Tearing meat','Sipping nectar','Catching fish'], correct:2, exp:'Long thin curved beaks (like hummingbirds) reach deep into flowers for nectar.' } },
+      eye:{ name:'Eye', fact:'Birds have extraordinary vision. A hawk can spot a mouse from 100 meters away, and pigeons see ultraviolet light invisible to humans.',
+        quiz:{ q:'What can birds see that humans cannot?', opts:['X-rays','Ultraviolet light','Radio waves','Infrared heat'], correct:1, exp:'Many birds see ultraviolet light, helping them find food and mates.' } },
+      wing:{ name:'Wing', fact:'Wings generate lift through their curved airfoil shape — air moves faster over the top, lowering pressure and pushing the bird upward.',
+        quiz:{ q:'How does a wing generate lift?', opts:['By flapping very fast','Air moves faster over the top','By being lighter than air','By spinning'], correct:1, exp:'The airfoil shape makes air flow faster over the wing, lowering pressure on top and creating lift.' } },
+      tail:{ name:'Tail Feathers', fact:'Tail feathers act as a rudder and brake. Birds fan them out to slow down for landing and twist them to steer through tight turns.',
+        quiz:{ q:'Tail feathers mainly help birds…', opts:['Stay warm','Steer and brake','Digest food','Attract mates only'], correct:1, exp:'Tail feathers are the bird’s rudder and air-brake, used for steering and landing.' } },
+      legs:{ name:'Legs & Feet', fact:'Bird feet are remarkably diverse. Ducks have webbed feet for paddling, eagles have sharp talons for grabbing prey, and perching birds have a back toe that locks onto branches.',
+        quiz:{ q:'Webbed feet are best suited for…', opts:['Grabbing prey','Swimming','Perching','Climbing'], correct:1, exp:'Webbed feet act like paddles — perfect for swimming, as in ducks and geese.' } },
+      heart:{ name:'Heart', fact:'A bird’s heart is huge relative to its body and beats up to 1,000 times per minute in flight — fueling the muscles with oxygen-rich blood.',
+        quiz:{ q:'Why do birds have such large, fast hearts?', opts:['To digest food faster','To support the high energy of flight','To stay warm in snow','To pump air'], correct:1, exp:'Flight is energy-intensive — a big fast heart delivers oxygen to flight muscles.' } }
+    }
+  },
+  rabbit: {
+    name:'Rabbit',
+    img:'https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/7dc7beb16e16.jpg',
+    hotspots:{
+      ears:   { top:12, left:47, label:'Ears' },
+      eye:    { top:25, left:55, label:'Eye' },
+      nose:   { top:31, left:62, label:'Nose' },
+      heart:  { top:42, left:50, label:'Heart' },
+      lungs:  { top:45, left:53, label:'Lungs' },
+      stomach:{ top:55, left:42, label:'Stomach' },
+      legs:   { top:75, left:40, label:'Hind Legs' },
+      tail:   { top:68, left:10, label:'Tail' }
+    },
+    parts:{
+      ears:{ name:'Ears', fact:'A rabbit’s giant ears aren’t just for hearing — they’re packed with blood vessels that release body heat, acting like built-in radiators to keep the rabbit cool.',
+        quiz:{ q:'Besides hearing, what else do rabbit ears do?', opts:['Store fat','Release body heat','Filter dust','Produce venom'], correct:1, exp:'Blood vessels in the ears radiate heat — rabbits cool themselves through their ears.' } },
+      eye:{ name:'Eye', fact:'Rabbit eyes are on the sides of their head, giving them nearly 360° vision. They can see a predator sneaking up from almost any direction — even behind them!',
+        quiz:{ q:'Why are rabbit eyes on the sides of their head?', opts:['To look cute','For nearly 360° vision','To see in the dark','To focus on food'], correct:1, exp:'Side-placed eyes give prey animals like rabbits a near-360° field of view to spot predators.' } },
+      nose:{ name:'Nose', fact:'A rabbit’s nose twitches up to 120 times per minute! Each twitch draws in scent particles, helping the rabbit smell predators or food from far away.',
+        quiz:{ q:'Why does a rabbit’s nose twitch so much?', opts:['To smell the air','To cool down','To clean its whiskers','Out of habit'], correct:0, exp:'Twitching draws in scent-laden air, helping rabbits detect predators and food.' } },
+      heart:{ name:'Heart', fact:'A rabbit’s heart beats about 200–300 times per minute — much faster than a human’s 60–100. This rapid pulse supports their famous quick bursts of speed.',
+        quiz:{ q:'A rabbit’s heart rate is roughly…', opts:['30–60 bpm','200–300 bpm','1000+ bpm','Same as a human'], correct:1, exp:'Rabbit hearts race at 200–300 bpm — perfect fuel for explosive sprinting.' } },
+      lungs:{ name:'Lungs', fact:'Rabbit lungs are highly efficient at extracting oxygen, fueling their powerful hind legs for sudden, explosive sprints away from danger.',
+        quiz:{ q:'What do the lungs do?', opts:['Pump blood','Exchange oxygen and CO₂','Filter urine','Digest food'], correct:1, exp:'Lungs take in oxygen and release carbon dioxide — the body’s gas-exchange organ.' } },
+      stomach:{ name:'Stomach', fact:'Rabbits are hindgut fermenters: they eat their food, excrete soft pellets called cecotropes, then eat those again to absorb all the nutrients. Yes — they re-eat their dinner!',
+        quiz:{ q:'What unusual thing do rabbits do to digest their food fully?', opts:['Drink seawater','Re-eat soft pellets','Chew stones','Store food in cheeks'], correct:1, exp:'Rabbits produce soft cecotropes which they re-ingest to extract maximum nutrients.' } },
+      legs:{ name:'Hind Legs', fact:'A rabbit’s powerful hind legs can launch it up to 3 meters in a single bound and reach speeds of 55 km/h. The muscles are mostly fast-twitch fibers built for sprinting.',
+        quiz:{ q:'What makes rabbit hind legs so powerful?', opts:['They have no bones','Mostly fast-twitch muscle','They store air','They are hollow'], correct:1, exp:'Fast-twitch muscle fibers in the hind legs give rabbits explosive jumping and sprinting power.' } },
+      tail:{ name:'Tail', fact:'A rabbit’s bright white tail flashes as it runs. Some scientists think this confuses predators by giving them a bright moving target that suddenly vanishes when the rabbit turns.',
+        quiz:{ q:'Why might a rabbit’s white tail be useful?', opts:['For warmth','To confuse predators','To store fat','To attract insects'], correct:1, exp:'The flashing white tail may distract predators, breaking their visual lock as the rabbit turns.' } }
+    }
+  }
+};
+let currentAnimal='fish';
+let currentPart=null;
+let currentQuiz=null;
+function renderAnatomyProgress(){
+  const a=anatomy[currentAnimal];
+  const total=Object.keys(a.parts).length;
+  const solved=Object.keys(a.parts).filter(id=>state.bioSolved[currentAnimal+'_'+id]).length;
+  document.getElementById('anatomyProgress').textContent=`${solved} / ${total}`;
+}
+function switchAnimal(name){
+  currentAnimal=name;
+  document.querySelectorAll('.animal-btn').forEach(b=>{
+    const on = b.dataset.animal===name;
+    b.classList.toggle('active', on);
+    b.style.background = on ? 'linear-gradient(135deg,var(--bio),#22d3ee)' : 'rgba(255,255,255,0.1)';
+    b.style.color = on ? '#fff' : '';
+  });
+  const host=document.getElementById('anatomyHost');
+  const animal = anatomy[name];
+  // Build the image + hotspot dots overlay
+  let html = '<div class="anatomy-wrap">';
+  html += `<img src="${animal.img}" alt="${animal.name}" onerror="this.style.background='#1a2a4a';this.style.height='300px';this.alt='Image unavailable — please check your internet connection.'">`;
+  Object.entries(animal.hotspots).forEach(([id, pos])=>{
+    const solved = state.bioSolved[name+'_'+id] ? ' solved' : '';
+    html += `<div class="hotspot-dot${solved}" data-id="${id}" data-label="${pos.label}" style="top:${pos.top}%;left:${pos.left}%"></div>`;
+  });
+  html += '</div>';
+  host.innerHTML = html;
+  // Attach click handlers to hotspot dots
+  host.querySelectorAll('.hotspot-dot').forEach(el=>{
+    el.addEventListener('click',()=>openAnatomyPart(name, el.dataset.id));
+  });
+  document.getElementById('anatomyName').textContent='—';
+  document.getElementById('anatomyFact').textContent='Click any glowing body part on the photo to learn about it.';
+  document.getElementById('anatomyQuiz').textContent='—';
+  document.getElementById('anatomyOpts').innerHTML='';
+  document.getElementById('anatomyFeedback').textContent='';
+  document.getElementById('aiQuizBtn').disabled = true;
+  renderAnatomyProgress();
+}
+document.querySelectorAll('.animal-btn').forEach(b=>b.addEventListener('click',()=>switchAnimal(b.dataset.animal)));
+function openAnatomyPart(animalId, partId){
+  const part=anatomy[animalId].parts[partId];
+  currentPart={animalId,partId,part};
+  currentQuiz = part.quiz;
+  document.getElementById('anatomyName').textContent=part.name;
+  document.getElementById('anatomyFact').textContent=part.fact;
+  renderQuiz();
+  document.getElementById('aiQuizBtn').disabled = false;
+}
+function renderQuiz(){
+  if(!currentQuiz) return;
+  document.getElementById('anatomyQuiz').textContent='Quiz: '+currentQuiz.q;
+  const optsHost=document.getElementById('anatomyOpts');
+  optsHost.innerHTML='';
+  document.getElementById('anatomyFeedback').textContent='';
+  currentQuiz.opts.forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.className='quiz-opt text-left text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10';
+    b.textContent=opt;
+    b.addEventListener('click',()=>answerSideQuiz(i));
+    optsHost.appendChild(b);
+  });
+}
+function answerSideQuiz(i){
+  if(!currentPart || !currentQuiz) return;
+  const q=currentQuiz;
+  const opts=document.querySelectorAll('#anatomyOpts .quiz-opt');
+  opts.forEach((b,idx)=>{
+    if(idx===q.correct) b.classList.add('correct');
+    else if(idx===i) b.classList.add('wrong');
+    b.disabled=true;
+  });
+  const fb=document.getElementById('anatomyFeedback');
+  if(i===q.correct){
+    fb.style.color='var(--good)';
+    fb.textContent='✅ Correct! '+q.exp;
+    if(!state.bioSolved[currentPart.animalId+'_'+currentPart.partId]){
+      state.bioSolved[currentPart.animalId+'_'+currentPart.partId]=true;
+      saveState();
+      document.querySelectorAll(`#anatomyHost .hotspot-dot[data-id="${currentPart.partId}"]`).forEach(el=>el.classList.add('solved'));
+      renderAnatomyProgress();
+      awardXp(currentPart.part.name+' quiz mastered!');
+    } else {
+      showToast('Already mastered','You earned this XP earlier.');
+    }
+  } else {
+    fb.style.color='var(--bad)';
+    fb.textContent='❌ Not quite. Correct answer: '+q.opts[q.correct]+'. '+q.exp;
+  }
+}
+/* AI Quiz generator for biology */
+document.getElementById('aiQuizBtn').addEventListener('click', async ()=>{
+  if(!currentPart) return;
+  const btn=document.getElementById('aiQuizBtn');
+  btn.textContent='🤖 Generating…'; btn.disabled=true;
+  try {
+    const prompt = `Generate ONE multiple-choice quiz question about the "${currentPart.part.name}" of a ${anatomy[currentAnimal].name.toLowerCase()}. The question should be educational and suitable for a curious beginner. Return JSON in this exact format: {"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}`;
+    const sys = 'You are a STEM quiz generator. Always return valid JSON only.';
+    const result = await callAIJSON(prompt, sys);
+    currentQuiz = {
+      q: result.question,
+      opts: result.options,
+      correct: result.correct,
+      exp: result.explanation
+    };
+    renderQuiz();
+    showToast('AI quiz ready','Fresh question generated!');
+  } catch(e){
+    showToast('AI error', e.message.slice(0,60));
+    // keep the previous quiz
+  }
+  btn.textContent='🎲 AI New Question'; btn.disabled=false;
+});
+
+/* ============================================================
+   AI STUDY BUDDY — generates lesson + quiz + flashcards
+   ============================================================ */
+let buddyFlashcards = [];
+let buddyFlashIdx = 0;
+async function generateBuddy(){
+  const topic = document.getElementById('buddyTopic').value.trim();
+  if(!topic){ showToast('Need a topic','Type something to learn about'); return; }
+  document.getElementById('buddyOutput').classList.add('hidden');
+  document.getElementById('buddyLoading').classList.remove('hidden');
+  document.getElementById('buddyStatus').textContent = '🤖 Generating lesson on: '+topic+'…';
+  try {
+    const prompt = `Create a learning module on the topic: "${topic}".
+Return JSON in this exact format:
+{
+  "title": "short catchy title",
+  "difficulty": "Easy/Medium/Hard",
+  "readTime": "X min",
+  "lesson": ["paragraph 1...", "paragraph 2...", "paragraph 3..."],
+  "keyPoints": ["point 1", "point 2", "point 3", "point 4", "point 5"],
+  "flashcards": [{"front":"question","back":"answer"}, ...5 cards],
+  "quiz": [{"question":"...","options":["a","b","c","d"],"correct":0}, ...3 questions]
+}
+Make content accurate, beginner-friendly, and engaging. The lesson should have 3 short paragraphs. Always provide exactly 5 flashcards and 3 quiz questions.`;
+    const sys = 'You are an expert STEM educator. Always return valid JSON only — no markdown, no code fences.';
+    const result = await callAIJSON(prompt, sys);
+    renderBuddy(result, topic);
+    awardXp('AI lesson on: '+topic);
+    document.getElementById('buddyStatus').textContent = '✅ Lesson ready on: '+topic;
+  } catch(e){
+    // Fallback: build a minimal demo lesson
+    const demo = {
+      title: topic,
+      difficulty: 'Demo',
+      readTime: '1 min',
+      lesson: [
+        'You asked about **'+topic+'**. In demo mode (no AI key set), I can only show this placeholder lesson.',
+        'To get a real AI-generated lesson with quiz and flashcards, click the ⚙️ button at the top right and add a free Google Gemini API key from aistudio.google.com.',
+        'Once configured, this section will fill with a real, accurate, beginner-friendly explanation of '+topic+'.'
+      ],
+      keyPoints: ['Add an API key to unlock AI', 'Free at aistudio.google.com', 'Gemini 1.5 Flash works great', 'Lessons, quizzes, and flashcards all AI-generated', 'Try the example topics after adding a key'],
+      flashcards: [
+        {front:'What is MindPulse AI?', back:'An AI-powered STEM learning app'},
+        {front:'How do I enable AI?', back:'Click ⚙️ and paste a Gemini API key'},
+        {front:'Where to get a key?', back:'aistudio.google.com (free)'},
+        {front:'What does the AI Buddy do?', back:'Generates lessons on any topic'},
+        {front:'Is the key safe?', back:'Stored only in your browser localStorage'}
+      ],
+      quiz: [
+        {question:'Where do you get a free Gemini API key?', options:['openai.com','aistudio.google.com','huggingface.co','github.com'], correct:1},
+        {question:'Where is the API key stored?', options:['On MindPulse servers','In browser localStorage','In a cookie','Nowhere'], correct:1},
+        {question:'What does AI Study Buddy generate?', options:['Only text','Lessons, quizzes, flashcards','Only quizzes','Only images'], correct:1}
+      ]
+    };
+    renderBuddy(demo, topic);
+    awardXp('Demo lesson on: '+topic);
+    document.getElementById('buddyStatus').innerHTML = '⚠️ <b>Demo mode</b> — add a Gemini API key in ⚙️ for real AI lessons. Error was: '+e.message.slice(0,80);
+  }
+  document.getElementById('buddyLoading').classList.add('hidden');
+}
+function renderBuddy(data, topic){
+  document.getElementById('buddyTitle').textContent = data.title || topic;
+  document.getElementById('buddyDiff').textContent = data.difficulty || '—';
+  document.getElementById('buddyTime').textContent = data.readTime || '—';
+  document.getElementById('buddyKeys').textContent = (data.keyPoints||[]).length;
+  // lesson
+  const lessonEl = document.getElementById('buddyLesson');
+  lessonEl.innerHTML = '';
+  (data.lesson||[]).forEach(p=>{
+    const div=document.createElement('p');
+    div.innerHTML = p.replace(/\*\*(.+?)\*\*/g,'<b style="color:var(--ai)">$1</b>');
+    lessonEl.appendChild(div);
+  });
+  // key points
+  if(data.keyPoints && data.keyPoints.length){
+    const kp = document.createElement('div');
+    kp.className='mt-3 pt-3 border-t border-white/10';
+    kp.innerHTML = '<div class="text-xs font-semibold mb-2">🔑 Key points</div><ul class="text-xs space-y-1 text-[var(--muted)]">' +
+      data.keyPoints.map(k=>'<li>• '+k+'</li>').join('') + '</ul>';
+    lessonEl.appendChild(kp);
+  }
+  // flashcards
+  buddyFlashcards = data.flashcards || [];
+  buddyFlashIdx = 0;
+  renderFlash();
+  // quiz
+  const quizEl = document.getElementById('buddyQuiz');
+  quizEl.innerHTML = '';
+  (data.quiz||[]).forEach((q,qi)=>{
+    const block = document.createElement('div');
+    block.className='rounded-xl p-3 bg-white/5';
+    block.innerHTML = '<div class="text-sm font-semibold mb-2">Q'+(qi+1)+'. '+q.question+'</div>';
+    const opts = document.createElement('div');
+    opts.className='grid grid-cols-1 sm:grid-cols-2 gap-2';
+    q.options.forEach((opt,oi)=>{
+      const b = document.createElement('button');
+      b.className='quiz-opt text-left text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10';
+      b.textContent = opt;
+      b.dataset.qi = qi; b.dataset.oi = oi;
+      b.addEventListener('click', ()=>buddyAnswer(b, qi, oi, q.correct));
+      opts.appendChild(b);
+    });
+    block.appendChild(opts);
+    quizEl.appendChild(block);
+  });
+  document.getElementById('buddyScore').textContent = '';
+  document.getElementById('buddyOutput').classList.remove('hidden');
+}
+function buddyAnswer(btn, qi, oi, correct){
+  const all = document.querySelectorAll('#buddyQuiz .quiz-opt');
+  // disable siblings in same question
+  document.querySelectorAll('#buddyQuiz .quiz-opt').forEach(b=>{
+    if(b.dataset.qi == qi){ b.disabled = true; }
+  });
+  if(oi===correct){ btn.classList.add('correct'); }
+  else {
+    btn.classList.add('wrong');
+    // mark correct
+    document.querySelectorAll('#buddyQuiz .quiz-opt').forEach(b=>{
+      if(b.dataset.qi == qi && +b.dataset.oi === correct) b.classList.add('correct');
+    });
+  }
+}
+document.getElementById('buddyGo').addEventListener('click', generateBuddy);
+document.getElementById('buddySubmit').addEventListener('click', ()=>{
+  const blocks = document.querySelectorAll('#buddyQuiz > div');
+  let correct=0, total=0;
+  blocks.forEach(blk=>{
+    const opts = blk.querySelectorAll('.quiz-opt');
+    opts.forEach(o=>{ if(!o.disabled) return; });
+    // find which was selected
+    let selected=-1, correctIdx=-1;
+    const buttons = blk.querySelectorAll('.quiz-opt');
+    buttons.forEach((b,i)=>{
+      if(b.classList.contains('wrong')||b.classList.contains('correct')) selected=i;
+    });
+    total++;
+    // count if user got it right (the selected button has 'correct' class)
+    buttons.forEach(b=>{
+      if((b.classList.contains('correct')||b.classList.contains('wrong')) && b.classList.contains('correct')) correct++;
+    });
+  });
+  // simpler recount: count correct .quiz-opt.correct that are also user-selected (have either correct or wrong)
+  let c=0, t=0;
+  document.querySelectorAll('#buddyQuiz > div').forEach(blk=>{
+    const buttons = blk.querySelectorAll('.quiz-opt');
+    const picked = Array.from(buttons).find(b=>b.classList.contains('correct')||b.classList.contains('wrong'));
+    if(picked){ t++; if(picked.classList.contains('correct')) c++; }
+  });
+  const pct = t? Math.round(c/t*100):0;
+  const scoreEl = document.getElementById('buddyScore');
+  scoreEl.textContent = `Score: ${c} / ${t} (${pct}%)`;
+  scoreEl.style.color = pct>=70?'var(--good)':pct>=40?'var(--warn)':'var(--bad)';
+  if(pct>=70 && t>0){
+    showToast('Quiz complete!', `${c}/${t} correct — well done!`);
+  }
+});
+/* Flashcard logic */
+function renderFlash(){
+  if(!buddyFlashcards.length) return;
+  document.getElementById('flashIdx').textContent = (buddyFlashIdx+1)+'/'+buddyFlashcards.length;
+  const card = document.getElementById('flashcard');
+  card.classList.remove('flipped');
+  document.getElementById('flashFront').innerHTML = '<div><div class="text-xs opacity-80 mb-1">Q</div><div class="font-bold text-sm">'+buddyFlashcards[buddyFlashIdx].front+'</div></div>';
+  document.getElementById('flashBack').innerHTML = '<div><div class="text-xs opacity-80 mb-1">A</div><div class="font-bold text-sm">'+buddyFlashcards[buddyFlashIdx].back+'</div></div>';
+}
+function flipFlash(){ document.getElementById('flashcard').classList.toggle('flipped'); }
+function nextFlash(){ if(!buddyFlashcards.length) return; buddyFlashIdx=(buddyFlashIdx+1)%buddyFlashcards.length; renderFlash(); }
+function prevFlash(){ if(!buddyFlashcards.length) return; buddyFlashIdx=(buddyFlashIdx-1+buddyFlashcards.length)%buddyFlashcards.length; renderFlash(); }
+
+/* ---------- init ---------- */
+window.addEventListener('resize',()=>{ drawPhysics(); });
+syncPhysLabels(); physReadouts();
+phys.ballIdx=computeTrajectory().pts.length-1;
+renderReagents();
+updateBeakerUI();
+renderDiscovered();
+switchAnimal('fish');
+renderXp();
+updateAiStatusUI();
+window.addEventListener('load',()=>{
+  if(window.renderMathInElement){
+    try{ renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\[',right:'\\]',display:true}]}); }catch(e){}
+  }
+  drawPhysics();
+});
+</script>
+</body>
+</html>
